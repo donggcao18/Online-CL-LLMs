@@ -584,7 +584,10 @@ class T5Attention(nn.Module):
             """reshape"""
             return states.transpose(1, 2).contiguous().view(batch_size, -1, self.inner_dim)
         
-        def agg_lora_states(hidden_states, lora_layer, pre_lora_layer, key_attention_weights):
+        def agg_lora_states(hidden_states, 
+                            lora_layer, 
+                            pre_lora_layer, 
+                            key_attention_weights):
             if pre_lora_layer is not None:
                 cur_lora_states = lora_layer(hidden_states).unsqueeze(0)
                 with torch.no_grad():
@@ -597,7 +600,9 @@ class T5Attention(nn.Module):
             
             return agg_lora_states.reshape(batch_size, -1, self.d_model)
 
-        def calculate_distances(features, distributions, distance_type='L2', temperature=1.0):
+        #dim [B, num_distribution, 1]
+        def calculate_distances(features, 
+                                distributions, distance_type='L2', temperature=1.0):
             with torch.no_grad():
                 distances = []
                 for gaussian in distributions:
@@ -641,14 +646,22 @@ class T5Attention(nn.Module):
                 
                 return dis_weights.unsqueeze(-1)  # [B, num_distributions, 1]
 
-        def project(hidden_states, proj_layer, key_value_states, past_key_value, key_attention_weights_v, lora_layer=None):
+        def project(hidden_states, 
+                    proj_layer, 
+                    key_value_states, 
+                    past_key_value, 
+                    key_attention_weights_v, 
+                    lora_layer=None):
             """projects hidden states correctly to key/query states"""
             if key_value_states is None:
                 # self-attn
                 # (batch_size, n_heads, seq_length, dim_per_head)
                 if lora_layer is not None:
                     if key_attention_weights_v is not None:
-                        lora_states = agg_lora_states(hidden_states, lora_layer, self.previous_lora_weights_v, key_attention_weights_v)
+                        lora_states = agg_lora_states(hidden_states, 
+                                                      lora_layer, 
+                                                      self.previous_lora_weights_v, 
+                                                      key_attention_weights_v)
                     else:
                         lora_states = lora_layer(hidden_states)
                     hidden_states = shape(proj_layer(hidden_states) + lora_states)
@@ -770,7 +783,7 @@ class T5Attention(nn.Module):
 
         if (self.distribution_q is not None) and (not self.is_decoder) and self.training:
             with torch.no_grad():
-                for each_q,each_ids_w in zip(hidden_states,input_ids):
+                for each_q, each_ids_w in zip(hidden_states,input_ids):
                     each_q=self.q(each_q.unsqueeze(0)).squeeze(0)
                     each_q=each_q[:len(each_ids_w)-(each_ids_w==0).long().sum()]
                     each_q=torch.mean(each_q,dim=0)
@@ -782,7 +795,6 @@ class T5Attention(nn.Module):
                             f"/0 error"
                         )
                     self.distribution_q.update(each_q)
-
 
         if (self.previous_lora_weights_q is not None) and (not self.is_decoder) and(hidden_states.shape[1]>1):
             if past_key_attention_weights_q is not None:
@@ -798,10 +810,14 @@ class T5Attention(nn.Module):
                         else:
                             key_q = torch.cat((key_q, each_q.unsqueeze(0)), dim=0)
                     
-                    self.key_attention_weights_q=calculate_distances(key_q,[self.distribution_q]+self.previous_lora_distribution_q,self.distances_way,self.distances_temperature)
+                    self.key_attention_weights_q=calculate_distances(key_q,
+                                                                     [self.distribution_q]+self.previous_lora_distribution_q,
+                                                                     self.distances_way,
+                                                                     self.distances_temperature)
 
                     if (self.training) and (self.train_key_weight_top > 0):
-                        self.key_attention_weights_q=top_k_weights(self.key_attention_weights_q,self.train_key_weight_top)
+                        self.key_attention_weights_q=top_k_weights(self.key_attention_weights_q,
+                                                                   self.train_key_weight_top)
                     elif (not self.training) and (self.test_key_weight_top > 0):
                         self.key_attention_weights_q=top_k_weights(self.key_attention_weights_q,self.test_key_weight_top)
                     
@@ -819,11 +835,16 @@ class T5Attention(nn.Module):
         if self.key_attention_weights_q is not None:
             query_states = shape(self.q(hidden_states)+agg_lora_states(hidden_states, self.lora_q, self.previous_lora_weights_q, self.key_attention_weights_q))
         else:
+            print("normal q")
             query_states = shape(self.q(hidden_states)+self.lora_q(hidden_states))
 
         # get key/value states
         key_states = project(
-            hidden_states, self.k, key_value_states, past_key_value[0] if past_key_value is not None else None, key_attention_weights
+            hidden_states, 
+            self.k, 
+            key_value_states, 
+            past_key_value[0] if past_key_value is not None else None, 
+            key_attention_weights
         )
 
         if (self.distribution_v is not None) and (not self.is_decoder) and self.training:
@@ -870,12 +891,18 @@ class T5Attention(nn.Module):
                 self.log_key_attention_weights_v.append(self.key_attention_weights_v.to('cpu'))
 
         value_states = project(
-            hidden_states, self.v, key_value_states, past_key_value[1] if past_key_value is not None else None, self.key_attention_weights_v, self.lora_v
+            hidden_states, 
+            self.v, 
+            key_value_states, 
+            past_key_value[1] if past_key_value is not None else None, 
+            self.key_attention_weights_v, 
+            self.lora_v
         )
 
         # compute scores
         scores = torch.matmul(
-            query_states, key_states.transpose(3, 2)
+            query_states, 
+            key_states.transpose(3, 2)
         )  # equivalent of torch.einsum("bnqd,bnkd->bnqk", query_states, key_states), compatible with onnx op>9
 
         if position_bias is None:

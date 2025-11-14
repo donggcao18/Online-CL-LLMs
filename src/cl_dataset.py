@@ -288,7 +288,13 @@ class CLInstructions(datasets.GeneratorBasedBuilder):
 
             yield example
 
-    def load_SuperNI_dataset(self, dataset_path, labels_path, dataset_name, sampling_strategy, max_num_instances, subset):
+    def load_SuperNI_dataset(self, 
+                             dataset_path, 
+                             labels_path, 
+                             dataset_name, 
+                             sampling_strategy, 
+                             max_num_instances, 
+                             subset):
 
         data = self._load_dataset(dataset_path)
         print(list(data.keys()))
@@ -344,12 +350,16 @@ class CLInstructions(datasets.GeneratorBasedBuilder):
             yield example
 
 
-    def _generate_examples(self, path=None, task_config=None, max_num_instances_per_task=None, subset=None):
+    def _generate_examples(self, 
+                           path=None, 
+                           task_config=None, 
+                           max_num_instances_per_task=None, 
+                           subset=None):
         """Yields examples."""
         logger.info(f"Generating tasks from = {path}")
 
         for task in task_config:
-            if task == 'SuperNI':
+            if task == 'SuperNI' or task == "CodeTask":
                 load_func = self.load_SuperNI_dataset
             elif task == "Long_Sequence":
                 load_func = self.load_LongSeq_dataset
@@ -359,6 +369,7 @@ class CLInstructions(datasets.GeneratorBasedBuilder):
             # load dataset
             for dataset in task_config[task]:
                 ds_name = dataset["dataset name"]
+                print(f"Loading {ds_name} dataset...")
                 sampling_strategy = dataset.get("sampling strategy", "random")
                 ds_path = os.path.join(path, task, ds_name, subset + '.json')
                 print(ds_path)
@@ -367,7 +378,11 @@ class CLInstructions(datasets.GeneratorBasedBuilder):
 
                 idx = -1
                 instances = []
-                for sample in load_func(ds_path, labels_path, ds_name, sampling_strategy, max_num_instances_per_task,
+                for sample in load_func(ds_path, 
+                                        labels_path, 
+                                        ds_name, 
+                                        sampling_strategy, 
+                                        max_num_instances_per_task,
                                         subset):
                     idx += 1
                     instances.append(sample)
