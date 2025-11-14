@@ -1,0 +1,4 @@
+logs_and_outputs/
+CODETASK_Benchmark/
+*.pyc
+__pycache__/
