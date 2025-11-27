@@ -835,7 +835,6 @@ class T5Attention(nn.Module):
         if self.key_attention_weights_q is not None:
             query_states = shape(self.q(hidden_states)+agg_lora_states(hidden_states, self.lora_q, self.previous_lora_weights_q, self.key_attention_weights_q))
         else:
-            print("normal q")
             query_states = shape(self.q(hidden_states)+self.lora_q(hidden_states))
 
         # get key/value states

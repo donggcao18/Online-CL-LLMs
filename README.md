@@ -4,23 +4,39 @@
 
 ![Architecture](./Architecture.png)
 
+## Requirements
+* Python 3.10.12
+* PyTorch 2.1.0
+* Transformers 4.30.2
+* CUDA 12.2
+
+## Preparation
+1. Setting up env
+```sh
+conda create -y -n nlp python=3.10.12
+conda activate nlp 
+cd Online-CL-LLMs
+pip install -r requirements_v2.txt
+```
+
+2. Generating data for CodeTask dataset 
+```sh
+python CODETASK_Benchmark/parse_into_json.py
+```
+
+3. Config for CodeTask has been already created and stored in  `configs/CodeTask`
+
+
+4. And the generated pseudo data points are in `/generated_data`.
+
 ## Training
 
-Generate the training script by executing:
+To implement T5 model on the CodeTask benchmark:
 
 ```sh
-python gen_script_new_{benchmark}_{model}.py
+bash t5_normal.sh
 ```
 
-Then run the resulting script to start the training.
-
-## Evaluation
-
-Compute key metrics including: Average Performance (AP), Forgetting Rate (F.Ra), Forward Transfer (FWT) and Backward Transfer (BWT). Execute the following command:
-
-```sh
-python score.py your_result_path single_result_path 
-```
 
 <!--
 ## Citation

@@ -117,8 +117,120 @@ class BleuScorer:
         bleu = geo_mean * bp
         return bleu  # typically a float in [0..1]
 
+import math
+import re
+import sys
+import xml.sax.saxutils
+
+class SmoothBLEU:
+    def __init__(self, n=4, smooth=True, preserve_case=False, eff_ref_len="shortest"):
+        self.n = n
+        self.smooth = smooth
+        self.preserve_case = preserve_case
+        self.eff_ref_len = eff_ref_len
+        self.nonorm = False
+
+        self.normalize1 = [
+            (re.compile('<skipped>'), ''), 
+            (re.compile(r'-\n'), ''), 
+            (re.compile(r'\n'), ' ')
+        ]
+        self.normalize2 = [
+            (re.compile(r'([\{-\~\[-\` -\&\(-\+\:-\@\/])'), r' \1 '),
+            (re.compile(r'([^0-9])([\.,])'), r'\1 \2 '),
+            (re.compile(r'([\.,])([^0-9])'), r' \1 \2'),
+            (re.compile(r'([0-9])(-)'), r'\1 \2 ')
+        ]
+
+    # ------------------------------
+    # Core functions
+    # ------------------------------
+    def normalize(self, s):
+        """Normalize and tokenize a sentence (like NIST mteval)."""
+        if self.nonorm:
+            return s.split()
+        if isinstance(s, list):
+            s = " ".join(s)
+        for (pattern, replace) in self.normalize1:
+            s = re.sub(pattern, replace, s)
+        s = xml.sax.saxutils.unescape(s, {'&quot;': '"'})
+        s = f" {s} "
+        if not self.preserve_case:
+            s = s.lower()
+        for (pattern, replace) in self.normalize2:
+            s = re.sub(pattern, replace, s)
+        return s.split()
+
+    def count_ngrams(self, words):
+        counts = {}
+        for k in range(1, self.n + 1):
+            for i in range(len(words) - k + 1):
+                ngram = tuple(words[i:i + k])
+                counts[ngram] = counts.get(ngram, 0) + 1
+        return counts
+
+    def cook_refs(self, refs):
+        refs = [self.normalize(ref) for ref in refs]
+        maxcounts = {}
+        for ref in refs:
+            counts = self.count_ngrams(ref)
+            for ngram, count in counts.items():
+                maxcounts[ngram] = max(maxcounts.get(ngram, 0), count)
+        return [len(ref) for ref in refs], maxcounts
+
+    def cook_test(self, test, cooked_refs):
+        reflens, refmaxcounts = cooked_refs
+        test = self.normalize(test)
+        result = {"testlen": len(test), "reflen": 0, "guess": [0]*self.n, "correct": [0]*self.n}
+
+        # effective reference length
+        if self.eff_ref_len == "shortest":
+            result["reflen"] = min(reflens)
+        elif self.eff_ref_len == "average":
+            result["reflen"] = float(sum(reflens)) / len(reflens)
+        elif self.eff_ref_len == "closest":
+            result["reflen"] = min(reflens, key=lambda r: abs(r - len(test)))
+
+        result["guess"] = [max(len(test) - k + 1, 0) for k in range(1, self.n + 1)]
+
+        counts = self.count_ngrams(test)
+        for ngram, count in counts.items():
+            result["correct"][len(ngram) - 1] += min(refmaxcounts.get(ngram, 0), count)
+
+        return result
+
+    def score_cooked(self, allcomps):
+        total = {'testlen': 0, 'reflen': 0, 'guess': [0]*self.n, 'correct': [0]*self.n}
+        for comps in allcomps:
+            total['testlen'] += comps['testlen']
+            total['reflen'] += comps['reflen']
+            for i in range(self.n):
+                total['guess'][i] += comps['guess'][i]
+                total['correct'][i] += comps['correct'][i]
+
+        logbleu = 0.0
+        for k in range(self.n):
+            correct = total['correct'][k]
+            guess = total['guess'][k]
+            add_smooth = 1 if self.smooth and k > 0 else 0
+            logbleu += math.log(correct + add_smooth + sys.float_info.min) - math.log(guess + add_smooth + sys.float_info.min)
+        logbleu /= float(self.n)
+
+        brevity_penalty = min(0, 1 - float(total['reflen'] + 1) / (total['testlen'] + 1))
+        bleu_score = math.exp(logbleu + brevity_penalty)
+        return bleu_score
+
+    # ------------------------------
+    # Public interface
+    # ------------------------------
+    def compute_bleu(self, refs, candidate):
+        cooked_refs = self.cook_refs(refs)
+        test = self.cook_test(candidate, cooked_refs)
+        return self.score_cooked([test])
+
 
 bleu_scorer = BleuScorer()
+smooth_bleu_scorer = SmoothBLEU()
 
 
 # adapted the flowing from Squad v1.1 evaluation, without removing the articles.
@@ -182,8 +294,33 @@ def bleu_score(prediction, ground_truth, xlingual=False):
     # BLEU expects reference_corpus as list of lists and translation_corpus as list
     reference_corpus = [[ref_tokens]]  # Single reference wrapped in list
     translation_corpus = [pred_tokens]
-    
+
     return bleu_scorer.compute_bleu(reference_corpus, translation_corpus)
+
+def smooth_bleu_score(prediction, ground_truth, xlingual=False):
+    """Compute BLEU score between prediction and ground truth."""
+    # Handle empty strings
+    if not prediction.strip() or not ground_truth.strip():
+        return 0.0
+    
+    if xlingual:
+        tokenizer = xlingual_tokenizer
+        pred_tokens = tokenizer.tokenize(prediction)
+        ref_tokens = tokenizer.tokenize(ground_truth)
+    else:
+        # Simple whitespace tokenization for default case
+        pred_tokens = prediction.split()
+        ref_tokens = ground_truth.split()
+    
+    # Handle empty token lists
+    if not pred_tokens or not ref_tokens:
+        return 0.0
+    
+    # BLEU expects reference_corpus as list of lists and translation_corpus as list
+    reference_corpus = ref_tokens  # Single reference wrapped in list
+    translation_corpus = pred_tokens
+    print(reference_corpus)
+    return smooth_bleu_scorer.compute_bleu(reference_corpus, translation_corpus)
 
 
 def metric_max_over_ground_truths(metric_fn, prediction, ground_truths, xlingual=False):
@@ -196,7 +333,7 @@ def metric_max_over_ground_truths(metric_fn, prediction, ground_truths, xlingual
 
 def compute_metrics(predictions, references, xlingual=False):
     assert len(predictions) == len(references), f"# of predictions {len(predictions)} doesn't match # of references {len(references)}."
-    exact_match, rouge1, rougeL, bleu = 0, 0, 0, 0
+    exact_match, rouge1, rougeL, bleu, smooth_bleu = 0, 0, 0, 0, 0
     for pred, gold in zip(predictions, references):
         gold = [gold]
         exact_match += metric_max_over_ground_truths(
@@ -211,11 +348,15 @@ def compute_metrics(predictions, references, xlingual=False):
         bleu += metric_max_over_ground_truths(
             bleu_score, prediction=pred, ground_truths=gold, xlingual=xlingual
         )
+        smooth_bleu += metric_max_over_ground_truths(
+            smooth_bleu_score, prediction=pred, ground_truths=gold, xlingual=xlingual
+        )
     exact_match = 100.0 * exact_match / len(references)
     rouge1 = 100.0 * rouge1 / len(references)
     rougeL = 100.0 * rougeL / len(references)
     bleu = 100.0 * bleu / len(references)
-    metrics = {"exact_match": exact_match, "rouge1": rouge1, "eval_rougeL": rougeL, "bleu": bleu}
+    smooth_bleu = 100.0 * smooth_bleu / len(references)
+    metrics = {"exact_match": exact_match, "rouge1": rouge1, "eval_rougeL": rougeL, "bleu": bleu, "smooth_bleu": smooth_bleu}
     metrics = {k: round(v, 4) for k, v in metrics.items()}
     return metrics
 
@@ -236,3 +377,5 @@ def compute_grouped_metrics(predictions, references, groups, xlingual=False):
         for metric, value in group_metrics.items():
             results[f"{metric}_for_{group}"] = value
     return results
+
+

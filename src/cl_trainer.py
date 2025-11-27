@@ -506,11 +506,11 @@ class Trainer(Seq2SeqTrainer):
             else:
                 # T5 generation config
                 gen_kwargs = {
-                    "max_new_tokens": 50,
+                    "max_new_tokens": 256,
                     "num_beams": 1,
                     "repetition_penalty": 1.0,
                     "decoder_start_token_id": 0,
-                    "eos_token_id": 1,
+                    "eos_token_id": 2,
                     "pad_token_id": 0,
                 }
                 

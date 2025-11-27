@@ -214,7 +214,7 @@ class CLInstructions(datasets.GeneratorBasedBuilder):
                     "path": split_dir,
                     "task_config": task_configs['dev'],
                     "max_num_instances_per_task": self.config.max_num_instances_per_eval_task,
-                    "subset": "dev"
+                    "subset": "validation"
                 }),
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
@@ -371,7 +371,7 @@ class CLInstructions(datasets.GeneratorBasedBuilder):
                 ds_name = dataset["dataset name"]
                 print(f"Loading {ds_name} dataset...")
                 sampling_strategy = dataset.get("sampling strategy", "random")
-                ds_path = os.path.join(path, task, ds_name, subset + '.json')
+                ds_path = os.path.join(path, ds_name, subset + '.json')
                 print(ds_path)
                 labels_path = None
                 assert os.path.exists(ds_path)
