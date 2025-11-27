@@ -18,7 +18,7 @@ python3 src/run_t5_new.py \
    --do_train \
    --do_predict \
    --predict_with_generate \
-   --model_name_or_path Salesforce/codet5p-220m \
+   --model_name_or_path Salesforce/codet5p-770m \
    --data_dir CODETASK_Benchmark \
    --task_order CONCODE,CodeTrans,CodeSearchNet,BFP \
    --task_config_dir configs/CodeTask/CONCODE \
