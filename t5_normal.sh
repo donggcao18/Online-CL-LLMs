@@ -13,13 +13,15 @@ fuser -k /dev/nvidia*
 export CUDA_DEVICE_ORDER="PCI_BUS_ID"
 export TORCH_DISTRIBUTED_DEBUG=DETAIL
 export CUDA_VISIBLE_DEVICES=0,1
-port=$(shuf -i25000-30000 -n1)  
+port=$(shuf -i25000-30000 -n1)
+DS_CONFIG="configs/ds_configs/stage2_without_offload.config"
 
-accelerate launch --num_processes 2 --mixed_precision bf16 --main_process_port "$port" src/run_t5_new.py \
+
+deepspeed --num_gpus=2 --master_port "$port" src/run_t5_new.py \
    --do_train \
    --do_predict \
    --predict_with_generate \
-   --model_name_or_path Salesforce/codet5p-770m \
+   --model_name_or_path Salesforce/codet5-base \
    --data_dir CODETASK_Benchmark \
    --task_order CONCODE,CodeTrans,CodeSearchNet,BFP \
    --task_config_dir configs/CodeTask/CONCODE \
@@ -31,6 +33,7 @@ accelerate launch --num_processes 2 --mixed_precision bf16 --main_process_port "
    --attn_lr 0.0 \
    --num_train_epochs 5 \
    --bf16 \
+   --deepspeed $DS_CONFIG \
    --run_name test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0 \
    --distances_temperature 1.0 \
    --distances_way L2 \
@@ -66,7 +69,7 @@ accelerate launch --num_processes 2 --mixed_precision bf16 --main_process_port "
 rm -rf logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/1-CONCODE/checkpoint*
 
 
-accelerate launch --num_processes 2 --mixed_precision bf16 --main_process_port "$port" src/run_t5_new.py \
+deepspeed --num_gpus=2 --master_port "$port" src/run_t5_new.py \
    --do_train \
    --do_predict \
    --predict_with_generate \
@@ -85,6 +88,7 @@ accelerate launch --num_processes 2 --mixed_precision bf16 --main_process_port "
    --attn_lr 0.0 \
    --num_train_epochs 5 \
    --bf16 \
+   --deepspeed $DS_CONFIG \
    --run_name test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0 \
    --distances_temperature 1.0 \
    --distances_way L2 \
@@ -121,7 +125,7 @@ rm -rf logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0
 
 
 
-accelerate launch --num_processes 2 --mixed_precision bf16 --main_process_port "$port" src/run_t5_new.py \
+deepspeed --num_gpus=2 --master_port "$port" src/run_t5_new.py \
    --do_train \
    --do_predict \
    --predict_with_generate \
@@ -140,6 +144,7 @@ accelerate launch --num_processes 2 --mixed_precision bf16 --main_process_port "
    --attn_lr 0.0 \
    --num_train_epochs 5 \
    --bf16 \
+   --deepspeed $DS_CONFIG \
    --run_name test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0 \
    --distances_temperature 1.0 \
    --distances_way L2 \
@@ -176,7 +181,7 @@ rm -rf logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0
 
 
 
-accelerate launch --num_processes 2 --mixed_precision bf16 --main_process_port "$port" src/run_t5_new.py \
+deepspeed --num_gpus=2 --master_port "$port" src/run_t5_new.py \
    --do_train \
    --do_predict \
    --predict_with_generate \
@@ -195,6 +200,7 @@ accelerate launch --num_processes 2 --mixed_precision bf16 --main_process_port "
    --attn_lr 0.0 \
    --num_train_epochs 5 \
    --bf16 \
+   --deepspeed $DS_CONFIG \
    --run_name test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0 \
    --distances_temperature 1.0 \
    --distances_way L2 \

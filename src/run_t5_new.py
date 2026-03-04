@@ -807,7 +807,6 @@ def main():
         callbacks=[DenserEvalCallback] if training_args.denser_evaluation else None
     )
     
-    trainer.is_deepspeed_enabled = False
     print("is_deepspeed_enabled", trainer.is_deepspeed_enabled)
 
     all_metrics = {"run_name": training_args.run_name}
