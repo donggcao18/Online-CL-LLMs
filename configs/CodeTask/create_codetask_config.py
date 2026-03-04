@@ -1,7 +1,16 @@
 import os
 import json
 
-TASK_LIST = ['CodeTrans', 'CodeSearchNet', 'BFP', 'CONCODE']
+TASK_LIST = [
+    'CodeTrans',
+    'CodeSearchNet',
+    'BFP',
+    'CONCODE',
+    'TheVault_Csharp',
+    'KodCode',
+    'RunBugRun',
+    'CoST',
+]
 BASE_DIR = "configs/CodeTask"  
 
 os.makedirs(BASE_DIR, exist_ok=True)
