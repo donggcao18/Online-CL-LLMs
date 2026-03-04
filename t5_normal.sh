@@ -12,12 +12,12 @@ fuser -k /dev/nvidia*
 
 export CUDA_DEVICE_ORDER="PCI_BUS_ID"
 export TORCH_DISTRIBUTED_DEBUG=DETAIL
-export CUDA_VISIBLE_DEVICES=0,1
+export CUDA_VISIBLE_DEVICES=0
 port=$(shuf -i25000-30000 -n1)
 DS_CONFIG="configs/ds_configs/stage2_without_offload.config"
 
 
-deepspeed --num_gpus=2 --master_port "$port" src/run_t5_new.py \
+python src/run_t5_new.py \
    --do_train \
    --do_predict \
    --predict_with_generate \
@@ -69,7 +69,7 @@ deepspeed --num_gpus=2 --master_port "$port" src/run_t5_new.py \
 rm -rf logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/1-CONCODE/checkpoint*
 
 
-deepspeed --num_gpus=2 --master_port "$port" src/run_t5_new.py \
+python src/run_t5_new.py \
    --do_train \
    --do_predict \
    --predict_with_generate \
@@ -125,7 +125,7 @@ rm -rf logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0
 
 
 
-deepspeed --num_gpus=2 --master_port "$port" src/run_t5_new.py \
+python src/run_t5_new.py \
    --do_train \
    --do_predict \
    --predict_with_generate \
@@ -181,7 +181,7 @@ rm -rf logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0
 
 
 
-deepspeed --num_gpus=2 --master_port "$port" src/run_t5_new.py \
+python src/run_t5_new.py \
    --do_train \
    --do_predict \
    --predict_with_generate \
