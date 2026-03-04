@@ -2,6 +2,7 @@ import os
 import json
 import hashlib 
 import numpy as np
+from typing import Any
 from datasets import load_dataset
 from tqdm import tqdm
 
@@ -133,6 +134,20 @@ def _to_string(value):
     return str(value)
 
 
+class CodeTaskPreprocessor:
+    @staticmethod
+    def _extract_first_paragraph(docstring: Any) -> str:
+        if docstring is None:
+            return ""
+        if isinstance(docstring, (list, tuple)):
+            s = " ".join(str(t) for t in docstring)
+        else:
+            s = str(docstring)
+        s = s.replace("\n", "").replace("\r", "")
+        s = " ".join(s.strip().split())
+        return s
+
+
 def convert_to_codetask(split_name="train", split_seed=42):
     if split_name not in HF_SPLIT_MAP:
         raise ValueError(f"Unsupported split_name '{split_name}'. Use one of {list(HF_SPLIT_MAP.keys())}")
@@ -155,7 +170,10 @@ def convert_to_codetask(split_name="train", split_seed=42):
 
             for example in tqdm(dataset, desc=f"Processing {task}::{split_name}"):
                 input_text = _to_string(example.get(text_key))
-                output_text = _to_string(example.get(label_key))
+                if task == 'CodeSearchNet':
+                    output_text = CodeTaskPreprocessor._extract_first_paragraph(example.get(label_key))
+                else:
+                    output_text = _to_string(example.get(label_key))
 
                 uid = hashlib.md5((task + "||" + input_text).encode("utf-8")).hexdigest()
 
