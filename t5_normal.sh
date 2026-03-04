@@ -6,16 +6,16 @@
 #SBATCH -N 1                           
 #SBATCH -t 20:00:00   
 #SBATCH --mem 128G 
-#SBATCH --gres=gpu:a100-sxm4-80gb:1
+#SBATCH --gres=gpu:a100-sxm4-80gb:2
 
 fuser -k /dev/nvidia*
 
 export CUDA_DEVICE_ORDER="PCI_BUS_ID"
 export TORCH_DISTRIBUTED_DEBUG=DETAIL
-export CUDA_VISIBLE_DEVICES=0
+export CUDA_VISIBLE_DEVICES=0,1
 port=$(shuf -i25000-30000 -n1)  
 
-python3 src/run_t5_new.py \
+accelerate launch --num_processes 2 --mixed_precision bf16 --main_process_port "$port" src/run_t5_new.py \
    --do_train \
    --do_predict \
    --predict_with_generate \
@@ -66,7 +66,7 @@ python3 src/run_t5_new.py \
 rm -rf logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/1-CONCODE/checkpoint*
 
 
-python3 src/run_t5_new.py \
+accelerate launch --num_processes 2 --mixed_precision bf16 --main_process_port "$port" src/run_t5_new.py \
    --do_train \
    --do_predict \
    --predict_with_generate \
@@ -78,7 +78,7 @@ python3 src/run_t5_new.py \
    --gen_data_dir generated_data/lora_gen_superni_llama \
    --task_config_dir configs/CodeTask/CodeTrans \
    --output_dir logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/2-CodeTrans \
-   --per_device_train_batch_size 32 \
+   --per_device_train_batch_size 64 \
    --per_device_eval_batch_size 32 \
    --gradient_accumulation_steps 1 \
    --learning_rate 3e-04 \
@@ -121,7 +121,7 @@ rm -rf logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0
 
 
 
-python3 src/run_t5_new.py \
+accelerate launch --num_processes 2 --mixed_precision bf16 --main_process_port "$port" src/run_t5_new.py \
    --do_train \
    --do_predict \
    --predict_with_generate \
@@ -133,7 +133,7 @@ python3 src/run_t5_new.py \
    --gen_data_dir generated_data/lora_gen_superni_llama \
    --task_config_dir configs/CodeTask/CodeSearchNet \
    --output_dir logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/3-CodeSearchNet \
-   --per_device_train_batch_size 32 \
+   --per_device_train_batch_size 64 \
    --per_device_eval_batch_size 32 \
    --gradient_accumulation_steps 1 \
    --learning_rate 3e-04 \
@@ -176,7 +176,7 @@ rm -rf logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0
 
 
 
-python3 src/run_t5_new.py \
+accelerate launch --num_processes 2 --mixed_precision bf16 --main_process_port "$port" src/run_t5_new.py \
    --do_train \
    --do_predict \
    --predict_with_generate \
