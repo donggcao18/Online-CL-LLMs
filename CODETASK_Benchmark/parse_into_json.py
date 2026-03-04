@@ -106,7 +106,7 @@ def _load_task_split(task, split_name, split_seed=42):
         split_set = 'train/small' if split_name == 'train' else HF_SPLIT_MAP[split_name]
         dataset = load_dataset(
             spec['dataset_name'],
-            languages=['c_sharp'],
+            languages=['c#'],
             split_set=split_set,
         )
         return dataset
