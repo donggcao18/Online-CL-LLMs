@@ -103,11 +103,15 @@ def _load_task_split(task, split_name, split_seed=42):
     spec = TASK_SPECS[task]
 
     if task == 'TheVault_Csharp':
-        split_set = 'train/small' if split_name == 'train' else HF_SPLIT_MAP[split_name]
+        split_map = {
+            'train': ['train/small'],
+            'dev': ['validation'],
+            'test': ['test'],
+        }
         dataset = load_dataset(
             spec['dataset_name'],
             languages=['c#'],
-            split_set=split_set,
+            split_set=split_map[split_name],
         )
         return dataset
 
