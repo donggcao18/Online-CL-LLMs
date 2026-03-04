@@ -12,6 +12,7 @@ fuser -k /dev/nvidia*
 
 export CUDA_DEVICE_ORDER="PCI_BUS_ID"
 export TORCH_DISTRIBUTED_DEBUG=DETAIL
+export CUDA_VISIBLE_DEVICES=0
 port=$(shuf -i25000-30000 -n1)  
 
 python3 src/run_t5_new.py \
