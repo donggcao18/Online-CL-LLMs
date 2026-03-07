@@ -32,8 +32,6 @@ python src/run_t5_new.py \
    --learning_rate 3e-04 \
    --attn_lr 0.0 \
    --num_train_epochs 5 \
-   --bf16 \
-   --deepspeed $DS_CONFIG \
    --run_name test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0 \
    --distances_temperature 1.0 \
    --distances_way L2 \
@@ -64,7 +62,9 @@ python src/run_t5_new.py \
    --test_key_weight_top 1 \
    --train_key_weight_top_p -1.0 \
    --test_key_weight_top_p -1.0 \
-   --successor N 
+   --successor N \
+   --bf16 \
+   # --deepspeed $DS_CONFIG \
 
 rm -rf logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/1-CONCODE/checkpoint*
 
@@ -88,7 +88,6 @@ python src/run_t5_new.py \
    --attn_lr 0.0 \
    --num_train_epochs 5 \
    --bf16 \
-   --deepspeed $DS_CONFIG \
    --run_name test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0 \
    --distances_temperature 1.0 \
    --distances_way L2 \
@@ -119,7 +118,8 @@ python src/run_t5_new.py \
    --test_key_weight_top 1 \
    --train_key_weight_top_p -1.0 \
    --test_key_weight_top_p -1.0 \
-   --successor N
+   --successor N \
+   --deepspeed $DS_CONFIG \
 
 rm -rf logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/2-CodeTrans/checkpoint*
 
@@ -144,7 +144,6 @@ python src/run_t5_new.py \
    --attn_lr 0.0 \
    --num_train_epochs 5 \
    --bf16 \
-   --deepspeed $DS_CONFIG \
    --run_name test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0 \
    --distances_temperature 1.0 \
    --distances_way L2 \
@@ -175,7 +174,8 @@ python src/run_t5_new.py \
    --test_key_weight_top 1 \
    --train_key_weight_top_p -1.0 \
    --test_key_weight_top_p -1.0 \
-   --successor N
+   --successor N \
+   --deepspeed $DS_CONFIG \
 
 rm -rf logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/3-CodeSearchNet/checkpoint*
 
@@ -200,7 +200,6 @@ python src/run_t5_new.py \
    --attn_lr 0.0 \
    --num_train_epochs 5 \
    --bf16 \
-   --deepspeed $DS_CONFIG \
    --run_name test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0 \
    --distances_temperature 1.0 \
    --distances_way L2 \
@@ -231,7 +230,8 @@ python src/run_t5_new.py \
    --test_key_weight_top 1 \
    --train_key_weight_top_p -1.0 \
    --test_key_weight_top_p -1.0 \
-   --successor N
+   --successor N \
+      --deepspeed $DS_CONFIG 
 
 rm -rf logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/4-BFP/checkpoint*
 
