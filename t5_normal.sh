@@ -47,7 +47,7 @@ python src/run_t5_new.py \
    --lr_scheduler_type constant \
    --warmup_steps 0 \
    --logging_strategy steps \
-   --logging_steps 10 \
+   --logging_steps 100 \
    --metric_for_best_model eval_rougeL \
    --evaluation_strategy steps \
    --save_strategy steps \
