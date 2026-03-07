@@ -56,17 +56,18 @@ TASK_SPECS = {
     #     'label_key': 'docstring',
     #     'definition': 'Translate the following C++ code into C#: ',
     # },
-        'TheVault_Csharp': {
+
+    # 'CodeSearchNet': {
+    #     'dataset_name': 'semeru/code-text-ruby',
+    #     'text_key': 'code',
+    #     'label_key': 'docstring',
+    #     'definition': 'Summarize the following Ruby code into English: ',
+    # },
+    'TheVault_Csharp': {
         'dataset_name': 'Fsoft-AIC/the-vault-function',
         'text_key': 'code',
         'label_key': 'docstring',
         'definition': 'Summarize the following C# code into English: ',
-    },
-        'CodeSearchNet': {
-        'dataset_name': 'semeru/code-text-ruby',
-        'text_key': 'code',
-        'label_key': 'docstring',
-        'definition': 'Summarize the following Ruby code into English: ',
     }
 }
 
