@@ -7,7 +7,8 @@
 #SBATCH -t 20:00:00   
 #SBATCH --mem 128G 
 #SBATCH --gres=gpu:a100-sxm4-80gb:2
-
+export HF_HOME=./.cache
+export HF_DATASETS_CACHE=./.cache
 fuser -k /dev/nvidia*
 
 export CUDA_DEVICE_ORDER="PCI_BUS_ID"
