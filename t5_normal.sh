@@ -21,7 +21,7 @@ python src/run_t5_new.py \
    --do_train \
    --do_predict \
    --predict_with_generate \
-   --model_name_or_path Salesforce/codet5-base \
+   --model_name_or_path Salesforce/codet5p-770m \
    --data_dir CODETASK_Benchmark \
    --task_order CONCODE,CodeTrans,CodeSearchNet,BFP,KodCode,RunBugRun,TheVault_Csharp,CoST \
    --task_config_dir configs/CodeTask/CONCODE \
@@ -73,7 +73,7 @@ python src/run_t5_new.py \
    --do_train \
    --do_predict \
    --predict_with_generate \
-   --model_name_or_path Salesforce/codet5-base \
+   --model_name_or_path Salesforce/codet5p-770m \
    --previous_lora_path logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/1-CONCODE/saved_weights \
    --previous_lora_distribution_path logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/1-CONCODE/saved_weights \
    --data_dir CODETASK_Benchmark \
@@ -129,7 +129,7 @@ python src/run_t5_new.py \
    --do_train \
    --do_predict \
    --predict_with_generate \
-   --model_name_or_path Salesforce/codet5-base \
+   --model_name_or_path Salesforce/codet5p-770m \
    --previous_lora_path logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/1-CONCODE/saved_weights,logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/2-CodeTrans/saved_weights \
    --previous_lora_distribution_path logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/1-CONCODE/saved_weights,logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/2-CodeTrans/saved_weights \
    --data_dir CODETASK_Benchmark \
@@ -185,7 +185,7 @@ python src/run_t5_new.py \
    --do_train \
    --do_predict \
    --predict_with_generate \
-   --model_name_or_path Salesforce/codet5-base \
+   --model_name_or_path Salesforce/codet5p-770m \
    --previous_lora_path logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/1-CONCODE/saved_weights,logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/2-CodeTrans/saved_weights,logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/3-CodeSearchNet/saved_weights \
    --previous_lora_distribution_path logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/1-CONCODE/saved_weights,logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/2-CodeTrans/saved_weights,logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/3-CodeSearchNet/saved_weights \
    --data_dir CODETASK_Benchmark \
@@ -243,7 +243,7 @@ rm -rf logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0
 # python3 src/run_t5_new_eval.py \
 #    --do_predict \
 #    --predict_with_generate \
-#    --model_name_or_path Salesforce/codet5-base \
+#    --model_name_or_path Salesforce/codet5p-770m \
 #    --previous_lora_path logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/1-CONCODE/saved_weights,logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/2-CodeTrans/saved_weights,logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/3-CodeSearchNet/saved_weights,logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/4-BFP/saved_weights \
 #    --previous_lora_distribution_path logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/1-CONCODE/saved_weights,logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/2-CodeTrans/saved_weights,logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/3-CodeSearchNet/saved_weights,logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/4-BFP/saved_weights \
 #    --data_dir CODETASK_Benchmark \
