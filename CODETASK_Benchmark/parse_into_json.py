@@ -3,7 +3,7 @@ import json
 import hashlib 
 import numpy as np
 from typing import Any
-from datasets import load_dataset
+from datasets import load_dataset, concatenate_datasets
 from tqdm import tqdm
 
 FOLDER_NAME = os.path.dirname(os.path.abspath(__file__))
@@ -110,12 +110,12 @@ def _load_task_split(task, split_name, split_seed=42):
             'dev': ['validation'],
             'test': ['test'],
         }
-        dataset = load_dataset(
+        dataset_dict = load_dataset(
             spec['dataset_name'],
             languages=['c_sharp'],
             split_set=split_map[split_name],
         )
-        return dataset
+        return concatenate_datasets(list(dataset_dict.values()))
 
     if task == 'KodCode':
         dataset = load_dataset(spec['dataset_name'], split='train')
