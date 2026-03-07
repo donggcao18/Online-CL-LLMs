@@ -9,60 +9,60 @@ from tqdm import tqdm
 FOLDER_NAME = os.path.dirname(os.path.abspath(__file__))
 
 TASK_LIST = [
-    'CodeTrans',
-    'CodeSearchNet',
-    'BFP',
-    'CONCODE',
-    'TheVault_Csharp',
-    'KodCode',
-    'RunBugRun',
-    'CoST',
+    # 'CodeTrans',
+    # 'CodeSearchNet',
+    # 'BFP',
+    # 'CONCODE',
+    # 'KodCode',
+    # 'RunBugRun',
+    # 'CoST',
+    'TheVault_Csharp'
 ]
 
 TASK_SPECS = {
-    # 'CONCODE': {
-    #     'dataset_name': 'AhmedSSoliman/CodeXGLUE-CONCODE',
-    #     'text_key': 'nl',
-    #     'label_key': 'code',
-    #     'definition': 'Generate Java code from the following English description: ',
-    # },
-    # 'CodeTrans': {
-    #     'dataset_name': 'CM/codexglue_codetrans',
-    #     'text_key': 'java',
-    #     'label_key': 'cs',
-    #     'definition': 'Translate the following Java code into C#: ',
-    # },
-    # 'BFP': {
-    #     'dataset_name': 'ayeshgk/code_x_glue_cc_code_refinement_annotated',
-    #     'text_key': 'buggy',
-    #     'label_key': 'fixed',
-    #     'definition': 'Refactor or improve the following Java code: ',
-    # },
-    # 'KodCode': {
-    #     'dataset_name': 'KodCode/KodCode-V1-SFT-R1',
-    #     'text_key': 'question',
-    #     'label_key': 'solution',
-    #     'definition': 'Generate Python code from the following description: ',
-    # },
-    # 'RunBugRun': {
-    #     'dataset_name': 'ASSERT-KTH/RunBugRun-Final',
-    #     'text_key': 'buggy_code',
-    #     'label_key': 'fixed_code',
-    #     'definition': 'Refactor or improve the following Ruby code: ',
-    # },
-    # 'CoST': {
-    #     'dataset_name': 'semeru/code-text-python',
-    #     'text_key': 'code',
-    #     'label_key': 'docstring',
-    #     'definition': 'Translate the following C++ code into C#: ',
-    # },
+    'CONCODE': {
+        'dataset_name': 'AhmedSSoliman/CodeXGLUE-CONCODE',
+        'text_key': 'nl',
+        'label_key': 'code',
+        'definition': 'Generate Java code from the following English description: ',
+    },
+    'CodeTrans': {
+        'dataset_name': 'CM/codexglue_codetrans',
+        'text_key': 'java',
+        'label_key': 'cs',
+        'definition': 'Translate the following Java code into C#: ',
+    },
+    'BFP': {
+        'dataset_name': 'ayeshgk/code_x_glue_cc_code_refinement_annotated',
+        'text_key': 'buggy',
+        'label_key': 'fixed',
+        'definition': 'Refactor or improve the following Java code: ',
+    },
+    'KodCode': {
+        'dataset_name': 'KodCode/KodCode-V1-SFT-R1',
+        'text_key': 'question',
+        'label_key': 'solution',
+        'definition': 'Generate Python code from the following description: ',
+    },
+    'RunBugRun': {
+        'dataset_name': 'ASSERT-KTH/RunBugRun-Final',
+        'text_key': 'buggy_code',
+        'label_key': 'fixed_code',
+        'definition': 'Refactor or improve the following Ruby code: ',
+    },
+    'CoST': {
+        'dataset_name': 'semeru/code-text-python',
+        'text_key': 'code',
+        'label_key': 'docstring',
+        'definition': 'Translate the following C++ code into C#: ',
+    },
 
-    # 'CodeSearchNet': {
-    #     'dataset_name': 'semeru/code-text-ruby',
-    #     'text_key': 'code',
-    #     'label_key': 'docstring',
-    #     'definition': 'Summarize the following Ruby code into English: ',
-    # },
+    'CodeSearchNet': {
+        'dataset_name': 'semeru/code-text-ruby',
+        'text_key': 'code',
+        'label_key': 'docstring',
+        'definition': 'Summarize the following Ruby code into English: ',
+    },
     'TheVault_Csharp': {
         'dataset_name': 'Fsoft-AIC/the-vault-function',
         'text_key': 'code',
