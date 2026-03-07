@@ -149,7 +149,7 @@ class CodeTaskPreprocessor:
         return s
 
 
-def convert_to_codetask(split_name="train", split_seed=42, max_eval_samples=1000, max_train_samples=None):
+def convert_to_codetask(split_name="train", split_seed=42, max_dev_samples=1000, max_test_samples=1000, max_train_samples=None):
     if split_name not in HF_SPLIT_MAP:
         raise ValueError(f"Unsupported split_name '{split_name}'. Use one of {list(HF_SPLIT_MAP.keys())}")
 
@@ -165,13 +165,20 @@ def convert_to_codetask(split_name="train", split_seed=42, max_eval_samples=1000
                     print(f"[{task}::{split_name}] Truncated train set: {original_size} → {max_train_samples} samples")
                 else:
                     print(f"[{task}::{split_name}] Train set size: {original_size} (max_train_samples={max_train_samples}, no truncation needed)")
-            elif split_name in ('dev', 'validation', 'test') and max_eval_samples is not None:
+            elif split_name in ('dev', 'validation') and max_dev_samples is not None:
                 original_size = len(dataset)
-                if original_size > max_eval_samples:
-                    dataset = dataset.select(range(max_eval_samples))
-                    print(f"[{task}::{split_name}] Truncated eval set: {original_size} → {max_eval_samples} samples")
+                if original_size > max_dev_samples:
+                    dataset = dataset.select(range(max_dev_samples))
+                    print(f"[{task}::{split_name}] Truncated dev set: {original_size} → {max_dev_samples} samples")
                 else:
-                    print(f"[{task}::{split_name}] Eval set size: {original_size} (max_eval_samples={max_eval_samples}, no truncation needed)")
+                    print(f"[{task}::{split_name}] Dev set size: {original_size} (max_dev_samples={max_dev_samples}, no truncation needed)")
+            elif split_name == 'test' and max_test_samples is not None:
+                original_size = len(dataset)
+                if original_size > max_test_samples:
+                    dataset = dataset.select(range(max_test_samples))
+                    print(f"[{task}::{split_name}] Truncated test set: {original_size} → {max_test_samples} samples")
+                else:
+                    print(f"[{task}::{split_name}] Test set size: {original_size} (max_test_samples={max_test_samples}, no truncation needed)")
 
             output_data = {
                 "Definition": [TASK_SPECS[task]['definition']],
@@ -208,4 +215,4 @@ def convert_to_codetask(split_name="train", split_seed=42, max_eval_samples=1000
 if __name__ == "__main__":
     np.random.seed(42)
     for split in ["train", "validation", "test"]:
-        convert_to_codetask(split_name=split, split_seed=42, max_eval_samples=1000, max_train_samples=100000)
+        convert_to_codetask(split_name=split, split_seed=42, max_dev_samples=1000, max_test_samples=5000, max_train_samples=100000)
