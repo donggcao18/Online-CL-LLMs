@@ -51,7 +51,7 @@ TASK_SPECS = {
         'definition': 'Refactor or improve the following Ruby code: ',
     },
     'CoST': {
-        'dataset_name': 'semeru/code-text-python',
+        'dataset_name': 'dongg18/CoST',
         'text_key': 'code',
         'label_key': 'docstring',
         'definition': 'Translate the following C++ code into C#: ',
@@ -95,7 +95,7 @@ def _split_train_only(dataset, task, split, split_seed=42):
     train_ds = tmp2['train']
     val_ds = tmp2['test']
 
-    mapping = {'train': train_ds, 'dev': val_ds, 'test': test_ds}
+    mapping = {'train': train_ds, 'validation': val_ds, 'test': test_ds}
     if split not in mapping:
         raise ValueError(f"Unknown split '{split}' for train-only task '{task}'")
     return mapping[split]
@@ -107,7 +107,7 @@ def _load_task_split(task, split_name, split_seed=42):
     if task == 'TheVault_Csharp':
         split_map = {
             'train': ['train/small'],
-            'dev': ['validation'],
+            'validation': ['validation'],
             'test': ['test'],
         }
         dataset_dict = load_dataset(
@@ -149,7 +149,7 @@ class CodeTaskPreprocessor:
         return s
 
 
-def convert_to_codetask(split_name="train", split_seed=42, max_eval_samples=1000):
+def convert_to_codetask(split_name="train", split_seed=42, max_eval_samples=1000, max_train_samples=None):
     if split_name not in HF_SPLIT_MAP:
         raise ValueError(f"Unsupported split_name '{split_name}'. Use one of {list(HF_SPLIT_MAP.keys())}")
 
@@ -158,7 +158,14 @@ def convert_to_codetask(split_name="train", split_seed=42, max_eval_samples=1000
             save_dir = os.path.join(FOLDER_NAME, task)
             os.makedirs(save_dir, exist_ok=True)
             dataset = _load_task_split(task, split_name, split_seed=split_seed)
-            if split_name in ('validation') and max_eval_samples is not None:
+            if split_name == 'train' and max_train_samples is not None:
+                original_size = len(dataset)
+                if original_size > max_train_samples:
+                    dataset = dataset.select(range(max_train_samples))
+                    print(f"[{task}::{split_name}] Truncated train set: {original_size} → {max_train_samples} samples")
+                else:
+                    print(f"[{task}::{split_name}] Train set size: {original_size} (max_train_samples={max_train_samples}, no truncation needed)")
+            elif split_name in ('dev', 'validation', 'test') and max_eval_samples is not None:
                 original_size = len(dataset)
                 if original_size > max_eval_samples:
                     dataset = dataset.select(range(max_eval_samples))
@@ -200,5 +207,5 @@ def convert_to_codetask(split_name="train", split_seed=42, max_eval_samples=1000
 
 if __name__ == "__main__":
     np.random.seed(42)
-    for split in ["train", "dev", "test"]:
-        convert_to_codetask(split_name=split, split_seed=42, max_eval_samples=1000)
+    for split in ["train", "validation", "test"]:
+        convert_to_codetask(split_name=split, split_seed=42, max_eval_samples=1000, max_train_samples=100000)
