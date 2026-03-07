@@ -9,13 +9,13 @@ from tqdm import tqdm
 FOLDER_NAME = os.path.dirname(os.path.abspath(__file__))
 
 TASK_LIST = [
-    # 'CodeTrans',
-    # 'CodeSearchNet',
-    # 'BFP',
-    # 'CONCODE',
-    # 'KodCode',
-    # 'RunBugRun',
-    # 'CoST',
+    'CodeTrans',
+    'CodeSearchNet',
+    'BFP',
+    'CONCODE',
+    'KodCode',
+    'RunBugRun',
+    'CoST',
     'TheVault_Csharp'
 ]
 
@@ -78,7 +78,7 @@ TRAIN_ONLY_TASKS = {
 
 HF_SPLIT_MAP = {
     'train': 'train',
-    'dev': 'validation',
+    'validation': 'validation',
     'test': 'test',
 }
 
@@ -149,7 +149,7 @@ class CodeTaskPreprocessor:
         return s
 
 
-def convert_to_codetask(split_name="train", split_seed=42):
+def convert_to_codetask(split_name="train", split_seed=42, max_eval_samples=1000):
     if split_name not in HF_SPLIT_MAP:
         raise ValueError(f"Unsupported split_name '{split_name}'. Use one of {list(HF_SPLIT_MAP.keys())}")
 
@@ -158,6 +158,13 @@ def convert_to_codetask(split_name="train", split_seed=42):
             save_dir = os.path.join(FOLDER_NAME, task)
             os.makedirs(save_dir, exist_ok=True)
             dataset = _load_task_split(task, split_name, split_seed=split_seed)
+            if split_name in ('validation') and max_eval_samples is not None:
+                original_size = len(dataset)
+                if original_size > max_eval_samples:
+                    dataset = dataset.select(range(max_eval_samples))
+                    print(f"[{task}::{split_name}] Truncated eval set: {original_size} → {max_eval_samples} samples")
+                else:
+                    print(f"[{task}::{split_name}] Eval set size: {original_size} (max_eval_samples={max_eval_samples}, no truncation needed)")
 
             output_data = {
                 "Definition": [TASK_SPECS[task]['definition']],
@@ -194,4 +201,4 @@ def convert_to_codetask(split_name="train", split_seed=42):
 if __name__ == "__main__":
     np.random.seed(42)
     for split in ["train", "dev", "test"]:
-        convert_to_codetask(split_name=split, split_seed=42)
+        convert_to_codetask(split_name=split, split_seed=42, max_eval_samples=1000)
