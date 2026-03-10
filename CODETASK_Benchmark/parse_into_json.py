@@ -9,14 +9,14 @@ from tqdm import tqdm
 FOLDER_NAME = os.path.dirname(os.path.abspath(__file__))
 
 TASK_LIST = [
-    # 'CodeTrans',
-    # 'CodeSearchNet',
-    # 'BFP',
-    # 'CONCODE',
-    # 'KodCode',
-    # 'RunBugRun',
+    'CodeTrans',
+    'CodeSearchNet',
+    'BFP',
+    'CONCODE',
+    'KodCode',
+    'RunBugRun',
     'CoST',
-    # 'TheVault_Csharp'
+    'TheVault_Csharp'
 ]
 
 TASK_SPECS = {
