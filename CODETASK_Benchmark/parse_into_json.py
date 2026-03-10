@@ -2,7 +2,8 @@ import os
 import json
 import hashlib 
 import numpy as np
-from datasets import load_dataset
+from typing import Any
+from datasets import load_dataset, concatenate_datasets
 from tqdm import tqdm
 
 FOLDER_NAME = os.path.dirname(os.path.abspath(__file__))
@@ -12,10 +13,10 @@ TASK_LIST = [
     'CodeSearchNet',
     'BFP',
     'CONCODE',
-    'TheVault_Csharp',
     'KodCode',
     'RunBugRun',
     'CoST',
+    'TheVault_Csharp'
 ]
 
 TASK_SPECS = {
@@ -31,23 +32,11 @@ TASK_SPECS = {
         'label_key': 'cs',
         'definition': 'Translate the following Java code into C#: ',
     },
-    'CodeSearchNet': {
-        'dataset_name': 'semeru/code-text-ruby',
-        'text_key': 'code',
-        'label_key': 'docstring',
-        'definition': 'Summarize the following Ruby code into English: ',
-    },
     'BFP': {
         'dataset_name': 'ayeshgk/code_x_glue_cc_code_refinement_annotated',
         'text_key': 'buggy',
         'label_key': 'fixed',
         'definition': 'Refactor or improve the following Java code: ',
-    },
-    'TheVault_Csharp': {
-        'dataset_name': 'Fsoft-AIC/the-vault-function',
-        'text_key': 'code',
-        'label_key': 'docstring',
-        'definition': 'Summarize the following C# code into English: ',
     },
     'KodCode': {
         'dataset_name': 'KodCode/KodCode-V1-SFT-R1',
@@ -62,11 +51,24 @@ TASK_SPECS = {
         'definition': 'Refactor or improve the following Ruby code: ',
     },
     'CoST': {
-        'dataset_name': 'semeru/code-text-python',
+        'dataset_name': 'dongg18/CoST',
         'text_key': 'code',
         'label_key': 'docstring',
         'definition': 'Translate the following C++ code into C#: ',
     },
+
+    'CodeSearchNet': {
+        'dataset_name': 'semeru/code-text-ruby',
+        'text_key': 'code',
+        'label_key': 'docstring',
+        'definition': 'Summarize the following Ruby code into English: ',
+    },
+    'TheVault_Csharp': {
+        'dataset_name': 'Fsoft-AIC/the-vault-function',
+        'text_key': 'code',
+        'label_key': 'docstring',
+        'definition': 'Summarize the following C# code into English: ',
+    }
 }
 
 TRAIN_ONLY_TASKS = {
@@ -76,7 +78,7 @@ TRAIN_ONLY_TASKS = {
 
 HF_SPLIT_MAP = {
     'train': 'train',
-    'dev': 'validation',
+    'validation': 'validation',
     'test': 'test',
 }
 
@@ -93,7 +95,7 @@ def _split_train_only(dataset, task, split, split_seed=42):
     train_ds = tmp2['train']
     val_ds = tmp2['test']
 
-    mapping = {'train': train_ds, 'dev': val_ds, 'test': test_ds}
+    mapping = {'train': train_ds, 'validation': val_ds, 'test': test_ds}
     if split not in mapping:
         raise ValueError(f"Unknown split '{split}' for train-only task '{task}'")
     return mapping[split]
@@ -103,13 +105,17 @@ def _load_task_split(task, split_name, split_seed=42):
     spec = TASK_SPECS[task]
 
     if task == 'TheVault_Csharp':
-        split_set = 'train/small' if split_name == 'train' else HF_SPLIT_MAP[split_name]
-        dataset = load_dataset(
+        split_map = {
+            'train': ['train/small'],
+            'validation': ['validation'],
+            'test': ['test'],
+        }
+        dataset_dict = load_dataset(
             spec['dataset_name'],
             languages=['c_sharp'],
-            split_set=split_set,
+            split_set=split_map[split_name],
         )
-        return dataset
+        return concatenate_datasets(list(dataset_dict.values()))
 
     if task == 'KodCode':
         dataset = load_dataset(spec['dataset_name'], split='train')
@@ -129,7 +135,21 @@ def _to_string(value):
     return str(value)
 
 
-def convert_to_codetask(split_name="train", split_seed=42):
+class CodeTaskPreprocessor:
+    @staticmethod
+    def _extract_first_paragraph(docstring: Any) -> str:
+        if docstring is None:
+            return ""
+        if isinstance(docstring, (list, tuple)):
+            s = " ".join(str(t) for t in docstring)
+        else:
+            s = str(docstring)
+        s = s.replace("\n", "")
+        s = " ".join(s.strip().split())
+        return s
+
+
+def convert_to_codetask(split_name="train", split_seed=42, max_dev_samples=1000, max_test_samples=1000, max_train_samples=None):
     if split_name not in HF_SPLIT_MAP:
         raise ValueError(f"Unsupported split_name '{split_name}'. Use one of {list(HF_SPLIT_MAP.keys())}")
 
@@ -138,6 +158,27 @@ def convert_to_codetask(split_name="train", split_seed=42):
             save_dir = os.path.join(FOLDER_NAME, task)
             os.makedirs(save_dir, exist_ok=True)
             dataset = _load_task_split(task, split_name, split_seed=split_seed)
+            if split_name == 'train' and max_train_samples is not None:
+                original_size = len(dataset)
+                if original_size > max_train_samples:
+                    dataset = dataset.select(range(max_train_samples))
+                    print(f"[{task}::{split_name}] Truncated train set: {original_size} → {max_train_samples} samples")
+                else:
+                    print(f"[{task}::{split_name}] Train set size: {original_size} (max_train_samples={max_train_samples}, no truncation needed)")
+            elif split_name in ('dev', 'validation') and max_dev_samples is not None:
+                original_size = len(dataset)
+                if original_size > max_dev_samples:
+                    dataset = dataset.select(range(max_dev_samples))
+                    print(f"[{task}::{split_name}] Truncated dev set: {original_size} → {max_dev_samples} samples")
+                else:
+                    print(f"[{task}::{split_name}] Dev set size: {original_size} (max_dev_samples={max_dev_samples}, no truncation needed)")
+            elif split_name == 'test' and max_test_samples is not None:
+                original_size = len(dataset)
+                if original_size > max_test_samples:
+                    dataset = dataset.select(range(max_test_samples))
+                    print(f"[{task}::{split_name}] Truncated test set: {original_size} → {max_test_samples} samples")
+                else:
+                    print(f"[{task}::{split_name}] Test set size: {original_size} (max_test_samples={max_test_samples}, no truncation needed)")
 
             output_data = {
                 "Definition": [TASK_SPECS[task]['definition']],
@@ -151,7 +192,10 @@ def convert_to_codetask(split_name="train", split_seed=42):
 
             for example in tqdm(dataset, desc=f"Processing {task}::{split_name}"):
                 input_text = _to_string(example.get(text_key))
-                output_text = _to_string(example.get(label_key))
+                if task == 'CodeSearchNet':
+                    output_text = CodeTaskPreprocessor._extract_first_paragraph(example.get(label_key))
+                else:
+                    output_text = _to_string(example.get(label_key))
 
                 uid = hashlib.md5((task + "||" + input_text).encode("utf-8")).hexdigest()
 
@@ -170,5 +214,5 @@ def convert_to_codetask(split_name="train", split_seed=42):
 
 if __name__ == "__main__":
     np.random.seed(42)
-    for split in ["train", "dev", "test"]:
-        convert_to_codetask(split_name=split, split_seed=42)
+    for split in ["train", "validation", "test"]:
+        convert_to_codetask(split_name=split, split_seed=42, max_dev_samples=1000, max_test_samples=5000, max_train_samples=100000)
