@@ -190,7 +190,7 @@ python src/run_t5_new.py \
    --task_order CONCODE,CodeTrans,CodeSearchNet,BFP,KodCode,RunBugRun,TheVault_Csharp,CoST \
    --gen_data_dir generated_data/lora_gen_superni_llama \
    --task_config_dir configs/CodeTask/CoST \
-   --output_dir logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/inference \
+   --output_dir logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/8-CoST \
    --per_device_train_batch_size 32 \
    --per_device_eval_batch_size 32 \
    --gradient_accumulation_steps 1 \
@@ -206,8 +206,6 @@ python src/run_t5_new.py \
    --generation_max_length 120 \
    --add_task_name False \
    --add_dataset_name False \
-   --overwrite_output_dir \
-   --overwrite_cache \
    --lr_scheduler_type constant \
    --warmup_steps 0 \
    --logging_strategy steps \
