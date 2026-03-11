@@ -419,7 +419,7 @@ def main():
 
     if cur_task in task_order:
         cur_task_id = task_order.index(cur_task)
-        if training_args.do_predict and !training_args.do_train:
+        if training_args.do_predict and not training_args.do_train:
             cur_task_id +=1
     else:
         cur_task_id=14
