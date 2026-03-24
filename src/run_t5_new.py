@@ -419,6 +419,7 @@ def main():
 
     if cur_task in task_order:
         cur_task_id = task_order.index(cur_task)
+
     else:
         cur_task_id=14
 
