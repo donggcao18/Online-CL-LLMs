@@ -181,7 +181,6 @@ DS_CONFIG="configs/ds_configs/stage2_without_offload.config"
 # rm -rf logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/7-TheVault_Csharp/checkpoint*
 
 python src/run_t5_new.py \
-   --do_train \
    --do_predict \
    --predict_with_generate \
    --model_name_or_path Salesforce/codet5p-770m \
@@ -207,8 +206,6 @@ python src/run_t5_new.py \
    --generation_max_length 120 \
    --add_task_name False \
    --add_dataset_name False \
-   --overwrite_output_dir \
-   --overwrite_cache \
    --lr_scheduler_type constant \
    --warmup_steps 0 \
    --logging_strategy steps \
@@ -230,7 +227,3 @@ python src/run_t5_new.py \
    --train_key_weight_top_p -1.0 \
    --test_key_weight_top_p -1.0 \
    --successor N \
-      # --deepspeed $DS_CONFIG 
-
-rm -rf logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/8-CoST/checkpoint*
-
