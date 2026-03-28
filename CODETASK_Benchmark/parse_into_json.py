@@ -37,7 +37,7 @@ def _load_task_split(task, split_name, split_seed=42):
         }
         dataset_dict = load_dataset(
             spec['dataset_name'],
-            languages=['c_sharp'],
+            languages=['c#'],
             split_set=split_map[split_name],
         )
         return concatenate_datasets(list(dataset_dict.values()))
