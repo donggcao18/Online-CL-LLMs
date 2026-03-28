@@ -18,56 +18,56 @@ port=$(shuf -i25000-30000 -n1)
 DS_CONFIG="configs/ds_configs/stage2_without_offload.config"
 
 
-# python src/run_t5_new.py \
-#    --do_train \
-#    --do_predict \
-#    --predict_with_generate \
-#    --model_name_or_path Salesforce/codet5p-770m \
-#    --data_dir CODETASK_Benchmark \
-#    --task_order CONCODE,CodeTrans,CodeSearchNet,BFP,KodCode,RunBugRun,TheVault_Csharp,CoST \
-#    --task_config_dir configs/CodeTask/CONCODE \
-#    --output_dir logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/1-CONCODE \
-#    --per_device_train_batch_size 32 \
-#    --per_device_eval_batch_size 32 \
-#    --gradient_accumulation_steps 1 \
-#    --learning_rate 3e-04 \
-#    --attn_lr 0.0 \
-#    --num_train_epochs 5 \
-#    --run_name test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0 \
-#    --distances_temperature 1.0 \
-#    --distances_way L2 \
-#    --max_source_length 320 \
-#    --max_target_length 150 \
-#    --generation_max_length 150 \
-#    --add_task_name False \
-#    --add_dataset_name False \
-#    --overwrite_output_dir \
-#    --overwrite_cache \
-#    --lr_scheduler_type constant \
-#    --warmup_steps 0 \
-#    --logging_strategy steps \
-#    --logging_steps 100 \
-#    --metric_for_best_model eval_rougeL \
-#    --evaluation_strategy steps \
-#    --save_strategy steps \
-#    --save_total_limit 1 \
-#    --lora_r 8 \
-#    --lora_alpha 32 \
-#    --lora_dropout 0.0 \
-#    --load_best_model_at_end \
-#    --data_replay_freq -1 \
-#    --replay_after_n_epoch 0 \
-#    --kl_ratio 1 \
-#    --attn_temperature 1 \
-#    --train_key_weight_top 1 \
-#    --test_key_weight_top 1 \
-#    --train_key_weight_top_p -1.0 \
-#    --test_key_weight_top_p -1.0 \
-#    --successor N \
-#    --bf16 \
-#    # --deepspeed $DS_CONFIG \
+python src/run_t5_new.py \
+   --do_train \
+   --do_predict \
+   --predict_with_generate \
+   --model_name_or_path Salesforce/codet5p-770m \
+   --data_dir CODETASK_Benchmark \
+   --task_order CONCODE,CodeTrans,CodeSearchNet,BFP,KodCode,RunBugRun,TheVault_Csharp,CoST \
+   --task_config_dir configs/CodeTask/CONCODE \
+   --output_dir logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/1-CONCODE \
+   --per_device_train_batch_size 32 \
+   --per_device_eval_batch_size 32 \
+   --gradient_accumulation_steps 1 \
+   --learning_rate 3e-04 \
+   --attn_lr 0.0 \
+   --num_train_epochs 3 \
+   --run_name test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0 \
+   --distances_temperature 1.0 \
+   --distances_way L2 \
+   --max_source_length 320 \
+   --max_target_length 150 \
+   --generation_max_length 150 \
+   --add_task_name False \
+   --add_dataset_name False \
+   --overwrite_output_dir \
+   --overwrite_cache \
+   --lr_scheduler_type constant \
+   --warmup_steps 0 \
+   --logging_strategy steps \
+   --logging_steps 100 \
+   --metric_for_best_model eval_rougeL \
+   --evaluation_strategy steps \
+   --save_strategy steps \
+   --save_total_limit 1 \
+   --lora_r 8 \
+   --lora_alpha 32 \
+   --lora_dropout 0.0 \
+   --load_best_model_at_end \
+   --data_replay_freq -1 \
+   --replay_after_n_epoch 0 \
+   --kl_ratio 1 \
+   --attn_temperature 1 \
+   --train_key_weight_top 1 \
+   --test_key_weight_top 1 \
+   --train_key_weight_top_p -1.0 \
+   --test_key_weight_top_p -1.0 \
+   --successor N \
+   --bf16 \
+   # --deepspeed $DS_CONFIG \
 
-# rm -rf logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/1-CONCODE/checkpoint*
+rm -rf logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/1-CONCODE/checkpoint*
 
 
 python src/run_t5_new.py \
@@ -87,7 +87,7 @@ python src/run_t5_new.py \
    --gradient_accumulation_steps 1 \
    --learning_rate 3e-04 \
    --attn_lr 0.0 \
-   --num_train_epochs 5 \
+   --num_train_epochs 3 \
    --bf16 \
    --run_name test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0 \
    --distances_temperature 1.0 \
@@ -143,7 +143,7 @@ python src/run_t5_new.py \
    --gradient_accumulation_steps 1 \
    --learning_rate 3e-04 \
    --attn_lr 0.0 \
-   --num_train_epochs 5 \
+   --num_train_epochs 3 \
    --bf16 \
    --run_name test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0 \
    --distances_temperature 1.0 \
@@ -199,7 +199,7 @@ python src/run_t5_new.py \
    --gradient_accumulation_steps 1 \
    --learning_rate 3e-04 \
    --attn_lr 0.0 \
-   --num_train_epochs 5 \
+   --num_train_epochs 3 \
    --bf16 \
    --run_name test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0 \
    --distances_temperature 1.0 \
@@ -257,7 +257,7 @@ rm -rf logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0
 #    --gradient_accumulation_steps 1 \
 #    --learning_rate 3e-04 \
 #    --attn_lr 0.0 \
-#    --num_train_epochs 5 \
+#    --num_train_epochs 3 \
 #    --bf16 \
 #    --run_name test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0 \
 #    --distances_temperature 1.0 \

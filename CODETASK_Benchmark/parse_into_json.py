@@ -4,7 +4,6 @@ import hashlib
 import numpy as np
 from typing import Any, Dict
 from datasets import load_dataset, concatenate_datasets
-from tqdm import tqdm
 from CODETASK_Benchmark.task_info import TASK_SPECS, HF_SPLIT_MAP, INSTRUCTION_POOL, TRAIN_ONLY_TASKS, TASK_LIST, INSTRUCTION_SPLIT_POLICY
 FOLDER_NAME = os.path.dirname(os.path.abspath(__file__))
 
@@ -157,7 +156,7 @@ def convert_to_codetask(split_name="train", split_seed=42, max_dev_samples=1000,
             text_key = TASK_SPECS[task]['text_key']
             label_key = TASK_SPECS[task]['label_key']
 
-            for example in tqdm(dataset, desc=f"Processing {task}::{split_name}"):
+            for example in dataset:
                 input_text = _to_string(example.get(text_key))
                 if task == 'CodeSearchNet':
                     output_text = CodeTaskPreprocessor._extract_first_paragraph(example.get(label_key))
