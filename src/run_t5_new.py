@@ -419,6 +419,7 @@ def main():
 
     if cur_task in task_order:
         cur_task_id = task_order.index(cur_task)
+
     else:
         cur_task_id=14
 
@@ -806,7 +807,6 @@ def main():
         compute_metrics=compute_rouge_metrics,
         callbacks=[DenserEvalCallback] if training_args.denser_evaluation else None
     )
-    
     trainer.is_deepspeed_enabled = False
     print("is_deepspeed_enabled", trainer.is_deepspeed_enabled)
 

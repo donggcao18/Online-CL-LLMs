@@ -2,85 +2,11 @@ import os
 import json
 import hashlib 
 import numpy as np
-from typing import Any
+from typing import Any, Dict
 from datasets import load_dataset, concatenate_datasets
 from tqdm import tqdm
-
+from CODETASK_Benchmark.task_info import TASK_SPECS, HF_SPLIT_MAP, INSTRUCTION_POOL, TRAIN_ONLY_TASKS, TASK_LIST, INSTRUCTION_SPLIT_POLICY
 FOLDER_NAME = os.path.dirname(os.path.abspath(__file__))
-
-TASK_LIST = [
-    'CodeTrans',
-    'CodeSearchNet',
-    'BFP',
-    'CONCODE',
-    'KodCode',
-    'RunBugRun',
-    'CoST',
-    'TheVault_Csharp'
-]
-
-TASK_SPECS = {
-    'CONCODE': {
-        'dataset_name': 'AhmedSSoliman/CodeXGLUE-CONCODE',
-        'text_key': 'nl',
-        'label_key': 'code',
-        'definition': 'Generate Java code from the following English description: ',
-    },
-    'CodeTrans': {
-        'dataset_name': 'CM/codexglue_codetrans',
-        'text_key': 'java',
-        'label_key': 'cs',
-        'definition': 'Translate the following Java code into C#: ',
-    },
-    'BFP': {
-        'dataset_name': 'ayeshgk/code_x_glue_cc_code_refinement_annotated',
-        'text_key': 'buggy',
-        'label_key': 'fixed',
-        'definition': 'Refactor or improve the following Java code: ',
-    },
-    'KodCode': {
-        'dataset_name': 'KodCode/KodCode-V1-SFT-R1',
-        'text_key': 'question',
-        'label_key': 'solution',
-        'definition': 'Generate Python code from the following description: ',
-    },
-    'RunBugRun': {
-        'dataset_name': 'ASSERT-KTH/RunBugRun-Final',
-        'text_key': 'buggy_code',
-        'label_key': 'fixed_code',
-        'definition': 'Refactor or improve the following Ruby code: ',
-    },
-    'CoST': {
-        'dataset_name': 'dongg18/CoST',
-        'text_key': 'code',
-        'label_key': 'docstring',
-        'definition': 'Translate the following C++ code into C#: ',
-    },
-
-    'CodeSearchNet': {
-        'dataset_name': 'semeru/code-text-ruby',
-        'text_key': 'code',
-        'label_key': 'docstring',
-        'definition': 'Summarize the following Ruby code into English: ',
-    },
-    'TheVault_Csharp': {
-        'dataset_name': 'Fsoft-AIC/the-vault-function',
-        'text_key': 'code',
-        'label_key': 'docstring',
-        'definition': 'Summarize the following C# code into English: ',
-    }
-}
-
-TRAIN_ONLY_TASKS = {
-    'KodCode': {'val': 5000, 'test': 5000},
-    'RunBugRun': {'val': 972, 'test': 1000},
-}
-
-HF_SPLIT_MAP = {
-    'train': 'train',
-    'validation': 'validation',
-    'test': 'test',
-}
 
 
 def _split_train_only(dataset, task, split, split_seed=42):
@@ -133,6 +59,47 @@ def _to_string(value):
     if value is None:
         return ""
     return str(value)
+
+
+def _get_candidate_instruction_pool(task_type: str, split_name: str):
+    pool = INSTRUCTION_POOL.get(task_type, [])
+    if not pool:
+        raise ValueError(f"No instruction templates defined for task_type '{task_type}'")
+
+    policy = INSTRUCTION_SPLIT_POLICY.get(split_name, INSTRUCTION_SPLIT_POLICY['train'])
+    if policy['pool_scope'] == 'full':
+        return pool
+
+    if policy['pool_scope'] == 'head_fraction':
+        fraction = float(policy.get('fraction', 0.75))
+        if fraction <= 0:
+            raise ValueError(f"Invalid fraction {fraction} for split '{split_name}'")
+        head_size = max(1, int(len(pool) * fraction))
+        return pool[:head_size]
+
+    raise ValueError(f"Unknown pool_scope '{policy['pool_scope']}' for split '{split_name}'")
+
+
+def _select_instruction_template(task_type: str, sample_key: str, split_name: str, split_seed: int) -> str:
+    candidate_pool = _get_candidate_instruction_pool(task_type, split_name)
+    random_key = f"{split_seed}::{split_name}::{sample_key}"
+    idx = int(hashlib.md5(random_key.encode("utf-8")).hexdigest(), 16) % len(candidate_pool)
+    return candidate_pool[idx]
+
+
+def _render_instruction(task: str, raw_input: str, sample_key: str, split_name: str, split_seed: int) -> str:
+    spec = TASK_SPECS[task]
+    task_type = spec['task_type']
+    template = _select_instruction_template(task_type, sample_key, split_name, split_seed)
+
+    format_values: Dict[str, str] = {
+        'language': spec.get('language', 'code'),
+        'description': raw_input,
+        'code': raw_input,
+        'source_lang': spec.get('source_lang', spec.get('language', 'source language')),
+        'target_lang': spec.get('target_lang', 'target language'),
+    }
+    return template.format(**format_values)
 
 
 class CodeTaskPreprocessor:
@@ -198,10 +165,17 @@ def convert_to_codetask(split_name="train", split_seed=42, max_dev_samples=1000,
                     output_text = _to_string(example.get(label_key))
 
                 uid = hashlib.md5((task + "||" + input_text).encode("utf-8")).hexdigest()
+                instruction_input = _render_instruction(
+                    task=task,
+                    raw_input=input_text,
+                    sample_key=f"{task}::{uid}",
+                    split_name=split_name,
+                    split_seed=split_seed,
+                )
 
                 output_data["Instances"].append({
                     "id": f"{task}-{uid}",
-                    "input": input_text,
+                    "input": instruction_input,
                     "output": [output_text]
                 })
 
