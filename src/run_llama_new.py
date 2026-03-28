@@ -331,7 +331,7 @@ class DataTrainingArguments:
         metadata={"help": "whether to preappend dataset name before the task input."}
     )
     add_instruction_replay: Optional[bool] = field(
-        default=True,
+        default=False,
         metadata={"help": "whether to preappend definition and few-shot cases before the task input during replay."}
     )
 

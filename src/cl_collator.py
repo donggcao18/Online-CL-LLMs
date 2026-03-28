@@ -38,7 +38,7 @@ class DataCollator:
     return_tensors: str = "pt"
     add_task_name: bool = False
     add_dataset_name: bool = False
-    add_instruction_replay: bool = True
+    add_instruction_replay: bool = False
     common_dataset_name: str = None
     text_only: bool = False
     num_examples: int = 0
@@ -88,8 +88,7 @@ class DataCollator:
                 instruction = instruction.format(content)
             finally:
                 return instruction
-        else:
-            return instruction
+        return content
 
 
     def seq2seq_call(self, batch, return_tensors):
