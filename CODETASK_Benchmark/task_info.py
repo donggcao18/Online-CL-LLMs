@@ -125,6 +125,7 @@ TASK_SPECS = {
         'label_key': 'code',
         'task_type': 'code_generation',
         'language': 'Java',
+        'definition': 'Generate Java code based on natural language descriptions.'
     },
     'CodeTrans': {
         'dataset_name': 'CM/codexglue_codetrans',
@@ -133,6 +134,8 @@ TASK_SPECS = {
         'task_type': 'code_translation',
         'source_lang': 'Java',
         'target_lang': 'C#',
+        'definition': 'Translate Java code to C#.'
+
     },
     'BFP': {
         'dataset_name': 'ayeshgk/code_x_glue_cc_code_refinement_annotated',
@@ -140,6 +143,7 @@ TASK_SPECS = {
         'label_key': 'fixed',
         'task_type': 'code_refinement',
         'language': 'Java',
+        'definition': 'Refine and improve Java code.'
     },
     'KodCode': {
         'dataset_name': 'KodCode/KodCode-V1-SFT-R1',
@@ -147,6 +151,7 @@ TASK_SPECS = {
         'label_key': 'solution',
         'task_type': 'code_generation',
         'language': 'Python',
+        'definition': 'Generate Python code based on natural language descriptions.'
     },
     'RunBugRun': {
         'dataset_name': 'ASSERT-KTH/RunBugRun-Final',
@@ -154,6 +159,7 @@ TASK_SPECS = {
         'label_key': 'fixed_code',
         'task_type': 'code_refinement',
         'language': 'Ruby',
+        'definition': 'Refine and improve Ruby code: '
     },
     'CoST': {
         'dataset_name': 'dongg18/CoST',
@@ -162,6 +168,7 @@ TASK_SPECS = {
         'task_type': 'code_translation',
         'source_lang': 'C++',
         'target_lang': 'C#',
+        'definition': 'Translate C++ code to C#: '
     },
 
     'CodeSearchNet': {
@@ -170,6 +177,7 @@ TASK_SPECS = {
         'label_key': 'docstring',
         'task_type': 'code_summarization',
         'language': 'Ruby',
+        'definition': 'Summarize Ruby code:'
     },
     'TheVault_Csharp': {
         'dataset_name': 'Fsoft-AIC/the-vault-function',
@@ -177,6 +185,8 @@ TASK_SPECS = {
         'label_key': 'docstring',
         'task_type': 'code_summarization',
         'language': 'C#',
+        'definition': 'Summarize C# code:'
+
     }
 }
 
