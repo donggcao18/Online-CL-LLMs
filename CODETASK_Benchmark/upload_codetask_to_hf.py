@@ -63,7 +63,7 @@ def main() -> None:
     parser.add_argument(
         "--data-root",
         type=str,
-        default="CODETASK_Benchmark/CodeTask",
+        default="CODETASK_Benchmark",
         help="Path containing task folders (BFP, CodeSearchNet, ...)",
     )
     parser.add_argument(
