@@ -44,7 +44,7 @@ contourpy==1.1.1
 Cython==3.0.3
 dask==2023.7.1
 dask-cuda==23.8.0
-# dask-cudf==23.8.0
+# dask-cudf==23.8.0s
 dataset==1.6.2
 datasets==2.14.6
 # debugpy==1.8.0
