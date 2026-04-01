@@ -115,7 +115,14 @@ class CodeTaskPreprocessor:
         return s
 
 
-def convert_to_codetask(split_name="train", split_seed=42, max_dev_samples=1000, max_test_samples=1000, max_train_samples=None):
+def convert_to_codetask(
+    split_name="train",
+    split_seed=42,
+    max_dev_samples=1000,
+    max_test_samples=1000,
+    max_train_samples=None,
+    use_instruction_pool=True,
+):
     if split_name not in HF_SPLIT_MAP:
         raise ValueError(f"Unsupported split_name '{split_name}'. Use one of {list(HF_SPLIT_MAP.keys())}")
 
@@ -164,13 +171,17 @@ def convert_to_codetask(split_name="train", split_seed=42, max_dev_samples=1000,
                     output_text = _to_string(example.get(label_key))
 
                 uid = hashlib.md5((task + "||" + input_text).encode("utf-8")).hexdigest()
-                instruction_input = _render_instruction(
-                    task=task,
-                    raw_input=input_text,
-                    sample_key=f"{task}::{uid}",
-                    split_name=split_name,
-                    split_seed=split_seed,
-                )
+                if use_instruction_pool:
+                    instruction_input = _render_instruction(
+                        task=task,
+                        raw_input=input_text,
+                        sample_key=f"{task}::{uid}",
+                        split_name=split_name,
+                        split_seed=split_seed,
+                    )
+                else:
+                    definition = _to_string(TASK_SPECS[task]['definition']).strip()
+                    instruction_input = f"{definition}\n\n{input_text}".strip()
 
                 output_data["Instances"].append({
                     "id": f"{task}-{uid}",
@@ -188,4 +199,11 @@ def convert_to_codetask(split_name="train", split_seed=42, max_dev_samples=1000,
 if __name__ == "__main__":
     np.random.seed(42)
     for split in ["train", "validation", "test"]:
-        convert_to_codetask(split_name=split, split_seed=42, max_dev_samples=1000, max_test_samples=5000, max_train_samples=100000)
+        convert_to_codetask(
+            split_name=split,
+            split_seed=42,
+            max_dev_samples=1000,
+            max_test_samples=5000,
+            max_train_samples=100000,
+            use_instruction_pool=True,
+        )
