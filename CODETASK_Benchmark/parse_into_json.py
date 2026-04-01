@@ -181,7 +181,7 @@ def convert_to_codetask(
                     )
                 else:
                     definition = _to_string(TASK_SPECS[task]['definition']).strip()
-                    instruction_input = f"{definition}\n\n{input_text}".strip()
+                    instruction_input = f"{definition}\n{input_text}".strip()
 
                 output_data["Instances"].append({
                     "id": f"{task}-{uid}",
