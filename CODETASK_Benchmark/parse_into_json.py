@@ -205,5 +205,5 @@ if __name__ == "__main__":
             max_dev_samples=1000,
             max_test_samples=5000,
             max_train_samples=100000,
-            use_instruction_pool=True,
+            use_instruction_pool=False,
         )
