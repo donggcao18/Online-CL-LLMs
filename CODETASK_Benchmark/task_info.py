@@ -1,10 +1,10 @@
 TASK_LIST = [
-    # 'CodeTrans',
-    # 'CodeSearchNet',
-    # 'BFP',
-    # 'CONCODE',
-    # 'RunBugRun',
-    # 'CoST',
+    'CodeTrans',
+    'CodeSearchNet',
+    'BFP',
+    'CONCODE',
+    'RunBugRun',
+    'CoST',
     'KodCode',
     'TheVault_Csharp'
 ]
