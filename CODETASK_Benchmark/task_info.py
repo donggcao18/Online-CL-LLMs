@@ -125,7 +125,7 @@ TASK_SPECS = {
         'label_key': 'code',
         'task_type': 'code_generation',
         'language': 'Java',
-        'definition': ' Generate Java code from the following English description:\n{description}'
+        'definition': ' Generate Java code from the following English description:'
     },
     'CodeTrans': {
         'dataset_name': 'CM/codexglue_codetrans',
@@ -134,7 +134,7 @@ TASK_SPECS = {
         'task_type': 'code_translation',
         'source_lang': 'Java',
         'target_lang': 'C#',
-        'definition': ' Translate the following Java code into C#:\n{code}'
+        'definition': ' Translate the following Java code into C#:'
 
     },
     'BFP': {
@@ -143,7 +143,7 @@ TASK_SPECS = {
         'label_key': 'fixed',
         'task_type': 'code_refinement',
         'language': 'Java',
-        'definition': 'Refactor or improve the following Java code: \n{code}'
+        'definition': 'Refactor or improve the following Java code:'
     },
     'KodCode': {
         'dataset_name': 'KodCode/KodCode-V1-SFT-R1',
@@ -151,7 +151,7 @@ TASK_SPECS = {
         'label_key': 'solution',
         'task_type': 'code_generation',
         'language': 'Python',
-        'definition': ' Generate Python code from the following description:\n{description}'
+        'definition': ' Generate Python code from the following description:'
     },
     'RunBugRun': {
         'dataset_name': 'ASSERT-KTH/RunBugRun-Final',
@@ -159,7 +159,7 @@ TASK_SPECS = {
         'label_key': 'fixed_code',
         'task_type': 'code_refinement',
         'language': 'Ruby',
-        'definition': 'Refactor or improve the following Ruby code: \n{code} '
+        'definition': 'Refactor or improve the following Ruby code:'
     },
     'CoST': {
         'dataset_name': 'dongg18/CoST',
@@ -168,7 +168,7 @@ TASK_SPECS = {
         'task_type': 'code_translation',
         'source_lang': 'C++',
         'target_lang': 'C#',
-        'definition': 'Translate the following C++ code into C#:\n{code} '
+        'definition': 'Translate the following C++ code into C#:'
     },
 
     'CodeSearchNet': {
@@ -177,7 +177,7 @@ TASK_SPECS = {
         'label_key': 'docstring',
         'task_type': 'code_summarization',
         'language': 'Ruby',
-        'definition': 'Summarize the following Ruby code into English:\n{code} '
+        'definition': 'Summarize the following Ruby code into English:'
     },
     'TheVault_Csharp': {
         'dataset_name': 'Fsoft-AIC/the-vault-function',
@@ -185,7 +185,7 @@ TASK_SPECS = {
         'label_key': 'docstring',
         'task_type': 'code_summarization',
         'language': 'C#',
-        'definition': 'Summarize the following C# code into English:\n{code}'
+        'definition': 'Summarize the following C# code into English:'
 
     }
 }
