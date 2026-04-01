@@ -61,9 +61,9 @@ def main() -> None:
         description="Upload CodeTask JSON datasets to Hugging Face Hub"
     )
     parser.add_argument(
-        "--data-root",
+        "--dat_root",
         type=str,
-        default="CODETASK_Benchmark",
+        default="/data/scratch/projects/punim1928/HUST/east/CodeGR/Dense/Online-CL-LLMs/CODETASK_Benchmark",
         help="Path containing task folders (BFP, CodeSearchNet, ...)",
     )
     parser.add_argument(
