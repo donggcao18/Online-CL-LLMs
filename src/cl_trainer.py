@@ -17,7 +17,8 @@ def skip_instructions(model, predictions_ids, tokenizer, ignore_idx=-100):
     )
 
     final_predictions = []
-    if check_model(model.config._name_or_path, SUPPORTED_DECODER_MODELS):
+    model_name = f"{getattr(model.config, '_name_or_path', '')} {getattr(model.config, 'model_type', '')}"
+    if check_model(model_name, SUPPORTED_DECODER_MODELS):
         for pred in predictions:
             if ANSWER_PREFIX in pred:
                 splits = pred.split(ANSWER_PREFIX)
@@ -480,6 +481,9 @@ class Trainer(Seq2SeqTrainer):
 
         # XXX: adapt synced_gpus for fairscale as well
         # gen_kwargs = self._gen_kwargs
+        model_name = f"{getattr(self.model.config, '_name_or_path', '')} {getattr(self.model.config, 'model_type', '')}"
+        is_decoder_model = check_model(model_name, SUPPORTED_DECODER_MODELS)
+
         if hasattr(self.model, "encoder") and self.model.encoder.main_input_name != self.model.main_input_name:
             # T5 generation config
             gen_kwargs = {
@@ -492,17 +496,51 @@ class Trainer(Seq2SeqTrainer):
             }
             gen_kwargs["synced_gpus"] = False
         else:
-            if inputs.get("input_ids_wo_label", None) is not None:
-                # LLaMA-2 generation config
+            if is_decoder_model:
+                tokenizer = self.tokenizer
+                model_config = self.model.config
+
+                bos_token_id = getattr(tokenizer, "bos_token_id", None) if tokenizer is not None else None
+                eos_token_id = getattr(tokenizer, "eos_token_id", None) if tokenizer is not None else None
+                pad_token_id = getattr(tokenizer, "pad_token_id", None) if tokenizer is not None else None
+
+                if bos_token_id is None:
+                    bos_token_id = getattr(model_config, "bos_token_id", None)
+                if eos_token_id is None:
+                    eos_token_id = getattr(model_config, "eos_token_id", None)
+                if pad_token_id is None:
+                    pad_token_id = getattr(model_config, "pad_token_id", None)
+
+                # Decoder-only models (e.g. LLaMA/Qwen) can run without a native pad token.
+                if pad_token_id is None and eos_token_id is not None:
+                    if tokenizer is not None and getattr(tokenizer, "pad_token_id", None) is None:
+                        if getattr(tokenizer, "eos_token", None) is not None:
+                            tokenizer.pad_token = tokenizer.eos_token
+                        tokenizer.pad_token_id = eos_token_id
+                    pad_token_id = eos_token_id
+
+                if getattr(model_config, "pad_token_id", None) is None and pad_token_id is not None:
+                    model_config.pad_token_id = pad_token_id
+                if hasattr(self.model, "generation_config"):
+                    if self.model.generation_config.pad_token_id is None and pad_token_id is not None:
+                        self.model.generation_config.pad_token_id = pad_token_id
+                    if self.model.generation_config.eos_token_id is None and eos_token_id is not None:
+                        self.model.generation_config.eos_token_id = eos_token_id
+                    if self.model.generation_config.bos_token_id is None and bos_token_id is not None:
+                        self.model.generation_config.bos_token_id = bos_token_id
+
                 gen_kwargs = {
-                    "bos_token_id": 1,
                     "max_new_tokens": 50,
                     "num_beams": 1,
                     "temperature": 1.0,
                     "repetition_penalty": 1.0,
-                    "eos_token_id": 2,
-                    "pad_token_id": 1,
                 }
+                if bos_token_id is not None:
+                    gen_kwargs["bos_token_id"] = bos_token_id
+                if eos_token_id is not None:
+                    gen_kwargs["eos_token_id"] = eos_token_id
+                if pad_token_id is not None:
+                    gen_kwargs["pad_token_id"] = pad_token_id
             else:
                 # T5 generation config
                 gen_kwargs = {
@@ -549,7 +587,7 @@ class Trainer(Seq2SeqTrainer):
 
         bs, source_len = inputs['input_ids'].shape
         # in case the batch is shorter than max length, the output should be padded
-        if check_model(self.model.config._name_or_path, SUPPORTED_DECODER_MODELS):
+        if is_decoder_model:
             max_length = source_len + gen_kwargs["max_new_tokens"]
         else:
             max_length = gen_kwargs["max_new_tokens"]

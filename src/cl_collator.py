@@ -6,7 +6,7 @@ from transformers.data.data_collator import *
 
 logger = logging.getLogger(__name__)
 
-SUPPORTED_DECODER_MODELS = ['llama']
+SUPPORTED_DECODER_MODELS = ['llama', 'qwen']
 SUPPORTED_SEQ2SEQ_MODELS = ['t5']
 
 def check_model(model_name, supported_models):
@@ -48,7 +48,7 @@ class DataCollator:
         if return_tensors is None:
             return_tensors = self.return_tensors
 
-        model_name = self.model.config._name_or_path
+        model_name = f"{getattr(self.model.config, '_name_or_path', '')} {getattr(self.model.config, 'model_type', '')}"
         # print(model_name)
         if check_model(model_name, SUPPORTED_DECODER_MODELS):
             model_inputs = self.decoder_call(batch, return_tensors)
