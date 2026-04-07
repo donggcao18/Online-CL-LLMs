@@ -15,7 +15,7 @@ export CUDA_DEVICE_ORDER="PCI_BUS_ID"
 export TORCH_DISTRIBUTED_DEBUG=DETAIL
 export CUDA_VISIBLE_DEVICES=0,1
 port=$(shuf -i25000-30000 -n1)
-DS_CONFIG="configs/ds_configs/stage2_without_offload.config"
+DS_CONFIG="configs/ds_configs/stage2.config"
 
 
 deepspeed --num_gpus=2 src/run_llama_new.py \
