@@ -22,7 +22,7 @@ deepspeed --num_gpus=2 src/run_llama_new.py \
    --do_train \
    --do_predict \
    --predict_with_generate \
-   --model_name_or_path Qwen/Qwen2.5-Coder-1.5B \
+   --model_name_or_path codellama/CodeLlama-7b-hf \
    --data_dir CODETASK_Benchmark \
    --task_order CONCODE,CodeTrans,CodeSearchNet,BFP,KodCode,RunBugRun,TheVault_Csharp,CoST \
    --task_config_dir configs/CodeTask/CONCODE \
