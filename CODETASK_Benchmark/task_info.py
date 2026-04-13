@@ -174,7 +174,7 @@ TASK_SPECS = {
     'CodeSearchNet': {
         'dataset_name': 'semeru/code-text-ruby',
         'text_key': 'code',
-        'label_key': 'docstring',
+        'label_key': 'docstring_tokens',
         'task_type': 'code_summarization',
         'language': 'Ruby',
         'definition': 'Summarize the following Ruby code into English:'
