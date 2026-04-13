@@ -5,7 +5,7 @@ import numpy as np
 from typing import Any, Dict
 from datasets import load_dataset, concatenate_datasets
 from task_info import TASK_SPECS, HF_SPLIT_MAP, INSTRUCTION_POOL, TRAIN_ONLY_TASKS, TASK_LIST, INSTRUCTION_SPLIT_POLICY
-FOLDER_NAME = os.path.dirname(os.path.abspath(__file__)) + "/without_instruction_pool"
+FOLDER_NAME = os.path.dirname(os.path.abspath(__file__))
 
 
 def _split_train_only(dataset, task, split, split_seed=42):
@@ -205,5 +205,5 @@ if __name__ == "__main__":
             max_dev_samples=1000,
             max_test_samples=5000,
             max_train_samples=100000,
-            use_instruction_pool=False,
+            use_instruction_pool=True,
         )

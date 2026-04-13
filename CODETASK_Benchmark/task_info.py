@@ -1,12 +1,12 @@
 TASK_LIST = [
-    'CodeTrans',
     'CodeSearchNet',
-    'BFP',
-    'CONCODE',
-    'RunBugRun',
-    'CoST',
-    'KodCode',
-    'TheVault_Csharp'
+    # 'CodeTrans',
+    # 'BFP',
+    # 'CONCODE',
+    # 'RunBugRun',
+    # 'CoST',
+    # 'KodCode',
+    # 'TheVault_Csharp'
 ]
 
 INSTRUCTION_POOL = {
