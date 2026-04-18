@@ -32,7 +32,7 @@ python src/run_t5_new.py \
    --gradient_accumulation_steps 1 \
    --learning_rate 3e-04 \
    --attn_lr 0.0 \
-   --num_train_epochs 5 \
+   --num_train_epochs 3 \
    --run_name test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0 \
    --distances_temperature 1.0 \
    --distances_way L2 \
@@ -51,7 +51,7 @@ python src/run_t5_new.py \
    --evaluation_strategy steps \
    --save_strategy steps \
    --save_total_limit 1 \
-   --lora_r 8 \
+   --lora_r 16 \
    --lora_alpha 32 \
    --lora_dropout 0.0 \
    --load_best_model_at_end \
@@ -87,7 +87,7 @@ python src/run_t5_new.py \
    --gradient_accumulation_steps 1 \
    --learning_rate 3e-04 \
    --attn_lr 0.0 \
-   --num_train_epochs 5 \
+   --num_train_epochs 3 \
    --bf16 \
    --run_name test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0 \
    --distances_temperature 1.0 \
@@ -108,7 +108,7 @@ python src/run_t5_new.py \
    --save_strategy steps \
    --save_total_limit 1 \
    --load_best_model_at_end \
-   --lora_r 8 \
+   --lora_r 16 \
    --lora_alpha 32 \
    --lora_dropout 0.0 \
    --data_replay_freq -1 \
@@ -143,7 +143,7 @@ python src/run_t5_new.py \
    --gradient_accumulation_steps 1 \
    --learning_rate 3e-04 \
    --attn_lr 0.0 \
-   --num_train_epochs 5 \
+   --num_train_epochs 3 \
    --bf16 \
    --run_name test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0 \
    --distances_temperature 1.0 \
@@ -164,7 +164,7 @@ python src/run_t5_new.py \
    --save_strategy steps \
    --save_total_limit 1 \
    --load_best_model_at_end \
-   --lora_r 8 \
+   --lora_r 16 \
    --lora_alpha 32 \
    --lora_dropout 0.0 \
    --data_replay_freq -1 \
@@ -199,7 +199,7 @@ python src/run_t5_new.py \
    --gradient_accumulation_steps 1 \
    --learning_rate 3e-04 \
    --attn_lr 0.0 \
-   --num_train_epochs 5 \
+   --num_train_epochs 3 \
    --bf16 \
    --run_name test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0 \
    --distances_temperature 1.0 \
@@ -220,7 +220,7 @@ python src/run_t5_new.py \
    --save_strategy steps \
    --save_total_limit 1 \
    --load_best_model_at_end \
-   --lora_r 8 \
+   --lora_r 16 \
    --lora_alpha 32 \
    --lora_dropout 0.0 \
    --data_replay_freq -1 \
@@ -256,7 +256,7 @@ python src/run_t5_new.py \
    --gradient_accumulation_steps 1 \
    --learning_rate 3e-04 \
    --attn_lr 0.0 \
-   --num_train_epochs 5 \
+   --num_train_epochs 3 \
    --bf16 \
    --run_name test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0 \
    --distances_temperature 1.0 \
@@ -277,7 +277,7 @@ python src/run_t5_new.py \
    --save_strategy steps \
    --save_total_limit 1 \
    --load_best_model_at_end \
-   --lora_r 8 \
+   --lora_r 16 \
    --lora_alpha 32 \
    --lora_dropout 0.0 \
    --data_replay_freq -1 \
@@ -310,7 +310,7 @@ python src/run_t5_new.py \
    --gradient_accumulation_steps 1 \
    --learning_rate 3e-04 \
    --attn_lr 0.0 \
-   --num_train_epochs 5 \
+   --num_train_epochs 3 \
    --bf16 \
    --run_name test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0 \
    --distances_temperature 1.0 \
@@ -331,7 +331,7 @@ python src/run_t5_new.py \
    --save_strategy steps \
    --save_total_limit 1 \
    --load_best_model_at_end \
-   --lora_r 8 \
+   --lora_r 16 \
    --lora_alpha 32 \
    --lora_dropout 0.0 \
    --data_replay_freq -1 \
@@ -364,7 +364,7 @@ python src/run_t5_new.py \
    --gradient_accumulation_steps 1 \
    --learning_rate 3e-04 \
    --attn_lr 0.0 \
-   --num_train_epochs 5 \
+   --num_train_epochs 3 \
    --bf16 \
    --run_name test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0 \
    --distances_temperature 1.0 \
@@ -385,7 +385,7 @@ python src/run_t5_new.py \
    --save_strategy steps \
    --save_total_limit 1 \
    --load_best_model_at_end \
-   --lora_r 8 \
+   --lora_r 16 \
    --lora_alpha 32 \
    --lora_dropout 0.0 \
    --data_replay_freq -1 \
@@ -418,7 +418,7 @@ python src/run_t5_new.py \
    --gradient_accumulation_steps 1 \
    --learning_rate 3e-04 \
    --attn_lr 0.0 \
-   --num_train_epochs 5 \
+   --num_train_epochs 3 \
    --bf16 \
    --run_name test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0 \
    --distances_temperature 1.0 \
@@ -439,7 +439,7 @@ python src/run_t5_new.py \
    --save_strategy steps \
    --save_total_limit 1 \
    --load_best_model_at_end \
-   --lora_r 8 \
+   --lora_r 16 \
    --lora_alpha 32 \
    --lora_dropout 0.0 \
    --data_replay_freq -1 \
@@ -473,7 +473,7 @@ rm -rf logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0
 #    --gradient_accumulation_steps 1 \
 #    --learning_rate 3e-04 \
 #    --attn_lr 0.0 \
-#    --num_train_epochs 5 \
+#    --num_train_epochs 3 \
 #    --bf16 \
 #    --run_name test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0 \
 #    --distances_temperature 1.0 \
@@ -494,7 +494,7 @@ rm -rf logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0
 #    --save_strategy steps \
 #    --save_total_limit 1 \
 #    --load_best_model_at_end \
-#    --lora_r 8 \
+#    --lora_r 16 \
 #    --lora_alpha 32 \
 #    --lora_dropout 0.0 \
 #    --data_replay_freq -1 \
