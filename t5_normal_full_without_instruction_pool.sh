@@ -27,7 +27,7 @@ python src/run_t5_new.py \
    --task_order CONCODE,CodeTrans,CodeSearchNet,BFP,KodCode,RunBugRun,TheVault_Csharp,CoST \
    --task_config_dir configs/CodeTask/CONCODE \
    --output_dir logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0_without_instruction_pool/outputs/1-CONCODE \
-   --per_device_train_batch_size 16 \
+   --per_device_train_batch_size 32 \
    --per_device_eval_batch_size 16 \
    --gradient_accumulation_steps 1 \
    --learning_rate 3e-04 \
@@ -82,7 +82,7 @@ python src/run_t5_new.py \
    --gen_data_dir generated_data/lora_gen_superni_llama \
    --task_config_dir configs/CodeTask/CodeTrans \
    --output_dir logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0_without_instruction_pool/outputs/2-CodeTrans \
-   --per_device_train_batch_size 16 \
+   --per_device_train_batch_size 32 \
    --per_device_eval_batch_size 16 \
    --gradient_accumulation_steps 1 \
    --learning_rate 3e-04 \
@@ -138,7 +138,7 @@ python src/run_t5_new.py \
    --gen_data_dir generated_data/lora_gen_superni_llama \
    --task_config_dir configs/CodeTask/CodeSearchNet \
    --output_dir logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0_without_instruction_pool/outputs/3-CodeSearchNet \
-   --per_device_train_batch_size 16 \
+   --per_device_train_batch_size 32 \
    --per_device_eval_batch_size 16 \
    --gradient_accumulation_steps 1 \
    --learning_rate 3e-04 \
@@ -194,7 +194,7 @@ python src/run_t5_new.py \
    --gen_data_dir generated_data/lora_gen_superni_llama \
    --task_config_dir configs/CodeTask/BFP \
    --output_dir logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0_without_instruction_pool/outputs/4-BFP \
-   --per_device_train_batch_size 16 \
+   --per_device_train_batch_size 32 \
    --per_device_eval_batch_size 16 \
    --gradient_accumulation_steps 1 \
    --learning_rate 3e-04 \
@@ -251,7 +251,7 @@ python src/run_t5_new.py \
    --gen_data_dir generated_data/lora_gen_superni_llama \
    --task_config_dir configs/CodeTask/KodCode \
    --output_dir logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0_without_instruction_pool/outputs/5-KodCode \
-   --per_device_train_batch_size 16 \
+   --per_device_train_batch_size 32 \
    --per_device_eval_batch_size 16 \
    --gradient_accumulation_steps 1 \
    --learning_rate 3e-04 \
@@ -261,9 +261,9 @@ python src/run_t5_new.py \
    --run_name test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0_without_instruction_pool \
    --distances_temperature 1.0 \
    --distances_way L2 \
-   --max_source_length 130 \
-   --max_target_length 120 \
-   --generation_max_length 120 \
+   --max_source_length 1024 \
+   --max_target_length 512 \
+   --generation_max_length 512 \
    --add_task_name False \
    --add_dataset_name False \
    --overwrite_output_dir \
@@ -305,7 +305,7 @@ python src/run_t5_new.py \
    --gen_data_dir generated_data/lora_gen_superni_llama \
    --task_config_dir configs/CodeTask/RunBugRun \
    --output_dir logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0_without_instruction_pool/outputs/6-RunBugRun \
-   --per_device_train_batch_size 16 \
+   --per_device_train_batch_size 32 \
    --per_device_eval_batch_size 16 \
    --gradient_accumulation_steps 1 \
    --learning_rate 3e-04 \
@@ -315,9 +315,9 @@ python src/run_t5_new.py \
    --run_name test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0_without_instruction_pool \
    --distances_temperature 1.0 \
    --distances_way L2 \
-   --max_source_length 130 \
-   --max_target_length 120 \
-   --generation_max_length 120 \
+   --max_source_length 256 \
+   --max_target_length 128 \
+   --generation_max_length 128 \
    --add_task_name False \
    --add_dataset_name False \
    --overwrite_output_dir \
@@ -359,7 +359,7 @@ python src/run_t5_new.py \
    --gen_data_dir generated_data/lora_gen_superni_llama \
    --task_config_dir configs/CodeTask/TheVault_Csharp \
    --output_dir logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0_without_instruction_pool/outputs/7-TheVault_Csharp \
-   --per_device_train_batch_size 16 \
+   --per_device_train_batch_size 32 \
    --per_device_eval_batch_size 16 \
    --gradient_accumulation_steps 1 \
    --learning_rate 3e-04 \
@@ -369,9 +369,9 @@ python src/run_t5_new.py \
    --run_name test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0_without_instruction_pool \
    --distances_temperature 1.0 \
    --distances_way L2 \
-   --max_source_length 130 \
-   --max_target_length 120 \
-   --generation_max_length 120 \
+   --max_source_length 256 \
+   --max_target_length 128 \
+   --generation_max_length 128 \
    --add_task_name False \
    --add_dataset_name False \
    --overwrite_output_dir \
@@ -413,7 +413,7 @@ python src/run_t5_new.py \
    --gen_data_dir generated_data/lora_gen_superni_llama \
    --task_config_dir configs/CodeTask/CoST \
    --output_dir logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0_without_instruction_pool/outputs/8-CoST \
-   --per_device_train_batch_size 16 \
+   --per_device_train_batch_size 32 \
    --per_device_eval_batch_size 16 \
    --gradient_accumulation_steps 1 \
    --learning_rate 3e-04 \
@@ -423,9 +423,9 @@ python src/run_t5_new.py \
    --run_name test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0_without_instruction_pool \
    --distances_temperature 1.0 \
    --distances_way L2 \
-   --max_source_length 130 \
-   --max_target_length 120 \
-   --generation_max_length 120 \
+   --max_source_length 256 \
+   --max_target_length 128 \
+   --generation_max_length 128 \
    --add_task_name False \
    --add_dataset_name False \
    --overwrite_output_dir \
@@ -468,7 +468,7 @@ rm -rf logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0
 #    --gen_data_dir generated_data/lora_gen_superni_llama \
 #    --task_config_dir configs/CodeTask/BFP \
 #    --output_dir logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0_without_instruction_pool/outputs/15-task875_emotion_classification \
-#    --per_device_train_batch_size 16 \
+#    --per_device_train_batch_size 32 \
 #    --per_device_eval_batch_size 8 \
 #    --gradient_accumulation_steps 1 \
 #    --learning_rate 3e-04 \

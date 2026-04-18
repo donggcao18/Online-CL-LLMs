@@ -261,9 +261,9 @@ python src/run_t5_new.py \
    --run_name test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0 \
    --distances_temperature 1.0 \
    --distances_way L2 \
-   --max_source_length 130 \
-   --max_target_length 120 \
-   --generation_max_length 120 \
+   --max_source_length 1024 \
+   --max_target_length 512 \
+   --generation_max_length 512 \
    --add_task_name False \
    --add_dataset_name False \
    --overwrite_output_dir \
@@ -315,9 +315,9 @@ python src/run_t5_new.py \
    --run_name test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0 \
    --distances_temperature 1.0 \
    --distances_way L2 \
-   --max_source_length 130 \
-   --max_target_length 120 \
-   --generation_max_length 120 \
+   --max_source_length 256 \
+   --max_target_length 128 \
+   --generation_max_length 128 \
    --add_task_name False \
    --add_dataset_name False \
    --overwrite_output_dir \
@@ -369,9 +369,9 @@ python src/run_t5_new.py \
    --run_name test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0 \
    --distances_temperature 1.0 \
    --distances_way L2 \
-   --max_source_length 130 \
-   --max_target_length 120 \
-   --generation_max_length 120 \
+   --max_source_length 256 \
+   --max_target_length 128 \
+   --generation_max_length 128 \
    --add_task_name False \
    --add_dataset_name False \
    --overwrite_output_dir \
@@ -423,9 +423,9 @@ python src/run_t5_new.py \
    --run_name test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0 \
    --distances_temperature 1.0 \
    --distances_way L2 \
-   --max_source_length 130 \
-   --max_target_length 120 \
-   --generation_max_length 120 \
+   --max_source_length 256 \
+   --max_target_length 128 \
+   --generation_max_length 128 \
    --add_task_name False \
    --add_dataset_name False \
    --overwrite_output_dir \
