@@ -65,9 +65,6 @@ python src/run_t5_new.py \
    --test_key_weight_top_p -1.0 \
    --successor N \
    --bf16 \
-   --max_train_samples 100 \
-   --max_eval_samples 100 \
-   --max_predict_samples 100 \
    # --deepspeed $DS_CONFIG \
 
 rm -rf logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/1-CONCODE/checkpoint*
@@ -123,9 +120,6 @@ python src/run_t5_new.py \
    --train_key_weight_top_p -1.0 \
    --test_key_weight_top_p -1.0 \
    --successor N \
-   --max_train_samples 100 \
-   --max_eval_samples 100 \
-   --max_predict_samples 100 \
    # --deepspeed $DS_CONFIG \
 
 rm -rf logs_and_outputs/test_t5_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/2-CodeTrans/checkpoint*
