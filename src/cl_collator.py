@@ -6,7 +6,7 @@ from transformers.data.data_collator import *
 
 logger = logging.getLogger(__name__)
 
-SUPPORTED_DECODER_MODELS = ['llama']
+SUPPORTED_DECODER_MODELS = ['llama', 'qwen']
 SUPPORTED_SEQ2SEQ_MODELS = ['t5']
 
 def check_model(model_name, supported_models):
