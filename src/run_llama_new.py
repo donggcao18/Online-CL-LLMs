@@ -500,6 +500,8 @@ def main():
         revision=model_args.model_revision,
         use_auth_token=True if model_args.use_auth_token else None,
         use_safetensors=True,
+        torch_dtype=torch.bfloat16,
+        low_cpu_mem_usage=True,
     ).to('cuda')
     
     model.resize_token_embeddings(len(tokenizer))
