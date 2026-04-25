@@ -27,7 +27,7 @@ deepspeed --num_gpus=2 src/run_llama_new.py \
    --task_order CONCODE,CodeTrans,CodeSearchNet,BFP,KodCode,RunBugRun,TheVault_Csharp,CoST \
    --task_config_dir configs/CodeTask/CONCODE \
    --output_dir logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/1-CONCODE \
-   --per_device_train_batch_size 8 \
+   --per_device_train_batch_size 1 \
    --per_device_eval_batch_size 8 \
    --gradient_accumulation_steps 2 \
    --learning_rate 3e-04 \
