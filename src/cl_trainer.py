@@ -511,7 +511,7 @@ class Trainer(Seq2SeqTrainer):
                         "num_beams": 1,
                         "temperature": 1.0,
                         "repetition_penalty": 1.0,
-                        "eos_token_id": 151645,
+                        "eos_token_id": 151643,
                         "pad_token_id": 151643,
                     }
                 else:
