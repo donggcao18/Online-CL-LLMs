@@ -491,18 +491,17 @@ class Trainer(Seq2SeqTrainer):
                 "eos_token_id": 1,
                 "pad_token_id": 0,
             }
-            gen_kwargs["synced_gpus"] = False
         else:
             if inputs.get("input_ids_wo_label", None) is not None:
                 if check_model(self.model.config._name_or_path, ["qwen"]):
                     # Qwen generation config
                     gen_kwargs = {
-                        "c": 151643,
+                        "bos_token_id": 151643,
                         "max_new_tokens": 256,
                         "num_beams": 1,
                         "temperature": 1.0,
                         "repetition_penalty": 1.0,
-                        "eos_token_id": 151643,
+                        "eos_token_id": 151645,
                         "pad_token_id": 151643,
                     }
                 else:
@@ -526,11 +525,10 @@ class Trainer(Seq2SeqTrainer):
                     "eos_token_id": 2,
                     "pad_token_id": 0,
                 }
-                
-            gen_kwargs["synced_gpus"] = False
 
+        generate_kwargs = {"synced_gpus": False}
         if "attention_mask" in inputs:
-            gen_kwargs["attention_mask"] = inputs.get("attention_mask", None)
+            generate_kwargs["attention_mask"] = inputs.get("attention_mask", None)
 
         generation_config = GenerationConfig(**gen_kwargs)
 
@@ -543,6 +541,7 @@ class Trainer(Seq2SeqTrainer):
             generated_tokens = self.model.generate(
                 input_ids=generation_inputs, 
                 generation_config=generation_config,
+                **generate_kwargs,
             )
         else:
             generation_inputs = inputs[self.model.main_input_name]
@@ -552,12 +551,14 @@ class Trainer(Seq2SeqTrainer):
                     input_ids=generation_inputs,
                     input_ids_wo_label=inputs["input_ids_wo_label"],
                     generation_config=generation_config,
+                    **generate_kwargs,
                 )
             
             else:
                 generated_tokens = self.model.generate(
                     input_ids=generation_inputs,
                     generation_config=generation_config,
+                    **generate_kwargs,
                 )
 
         bs, source_len = inputs['input_ids'].shape
