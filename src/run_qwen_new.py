@@ -454,6 +454,7 @@ def main():
         use_fast = model_args.use_fast_tokenizer,
         revision = model_args.model_revision,
         use_auth_token = True if model_args.use_auth_token else None,
+        padding_side = 'left',
     )
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token_id = tokenizer.eos_token_id
