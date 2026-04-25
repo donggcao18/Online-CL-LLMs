@@ -18,16 +18,16 @@ port=$(shuf -i25000-30000 -n1)
 DS_CONFIG="configs/ds_configs/stage2.config"
 
 
-deepspeed --num_gpus=2 src/run_qwen_new.py \
+deepspeed --num_gpus=2 src/run_llama_new.py \
    --do_train \
    --do_predict \
    --predict_with_generate \
-   --model_name_or_path Qwen/Qwen2.5-Coder-1.5B \
+   --model_name_or_path codellama/CodeLlama-7b-hf \
    --data_dir CODETASK_Benchmark \
    --task_order CONCODE,CodeTrans,CodeSearchNet,BFP,KodCode,RunBugRun,TheVault_Csharp,CoST \
    --task_config_dir configs/CodeTask/CONCODE \
    --output_dir logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/1-CONCODE \
-   --per_device_train_batch_size 4 \
+   --per_device_train_batch_size 1 \
    --per_device_eval_batch_size 8 \
    --gradient_accumulation_steps 2 \
    --learning_rate 3e-04 \
@@ -70,7 +70,7 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
 rm -rf logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/1-CONCODE/checkpoint*
 
 
-# deepspeed --num_gpus=2 src/run_qwen_new.py \
+# deepspeed --num_gpus=2 src/run_llama_new.py \
 #    --do_train \
 #    --do_predict \
 #    --predict_with_generate \
@@ -126,7 +126,7 @@ rm -rf logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1
 
 
 
-# deepspeed --num_gpus=2 src/run_qwen_new.py \
+# deepspeed --num_gpus=2 src/run_llama_new.py \
 #    --do_train \
 #    --do_predict \
 #    --predict_with_generate \
@@ -182,7 +182,7 @@ rm -rf logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1
 
 
 
-# deepspeed --num_gpus=2 src/run_qwen_new.py \
+# deepspeed --num_gpus=2 src/run_llama_new.py \
 #    --do_train \
 #    --do_predict \
 #    --predict_with_generate \
@@ -239,7 +239,7 @@ rm -rf logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1
 
 
 
-# deepspeed --num_gpus=2 src/run_qwen_new.py \
+# deepspeed --num_gpus=2 src/run_llama_new.py \
 #    --do_train \
 #    --do_predict \
 #    --predict_with_generate \
@@ -293,7 +293,7 @@ rm -rf logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1
 
 # rm -rf logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/5-KodCode/checkpoint*
 
-# deepspeed --num_gpus=2 src/run_qwen_new.py \
+# deepspeed --num_gpus=2 src/run_llama_new.py \
 #    --do_train \
 #    --do_predict \
 #    --predict_with_generate \
@@ -347,7 +347,7 @@ rm -rf logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1
 
 # rm -rf logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/6-RunBugRun/checkpoint*
 
-# deepspeed --num_gpus=2 src/run_qwen_new.py \
+# deepspeed --num_gpus=2 src/run_llama_new.py \
 #    --do_train \
 #    --do_predict \
 #    --predict_with_generate \
@@ -401,7 +401,7 @@ rm -rf logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1
 
 # rm -rf logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/7-TheVault_Csharp/checkpoint*
 
-# deepspeed --num_gpus=2 src/run_qwen_new.py \
+# deepspeed --num_gpus=2 src/run_llama_new.py \
 #    --do_train \
 #    --do_predict \
 #    --predict_with_generate \
