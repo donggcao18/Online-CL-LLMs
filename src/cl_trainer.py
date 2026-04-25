@@ -4,6 +4,8 @@ from transformers.trainer_seq2seq import Seq2SeqTrainer
 from transformers.trainer import *
 from transformers.trainer_callback import TrainerCallback
 import numpy as np
+import transformers
+from packaging import version
 
 from cl_collator import SUPPORTED_DECODER_MODELS, check_model
 from cl_dataset import ANSWER_PREFIX
@@ -242,12 +244,13 @@ class Trainer(Seq2SeqTrainer):
 
             optimizer_cls, optimizer_kwargs = Trainer.get_optimizer_cls_and_kwargs(self.args)
 
-            if self.sharded_ddp == ShardedDDPOption.SIMPLE:
-                self.optimizer = OSS(
-                    params=optimizer_grouped_parameters,
-                    optim=optimizer_cls,
-                    **optimizer_kwargs,
-                )
+            if version.parse(transformers.__version__) <= version.parse("4.30.2"):
+                if getattr(self, 'sharded_ddp', None) == ShardedDDPOption.SIMPLE:
+                    self.optimizer = OSS(
+                        params=optimizer_grouped_parameters,
+                        optim=optimizer_cls,
+                        **optimizer_kwargs,
+                    )
             else:
                 self.optimizer = optimizer_cls(optimizer_grouped_parameters, **optimizer_kwargs)
                 if optimizer_cls.__name__ == "Adam8bit":
@@ -491,16 +494,28 @@ class Trainer(Seq2SeqTrainer):
             gen_kwargs["synced_gpus"] = False
         else:
             if inputs.get("input_ids_wo_label", None) is not None:
-                # LLaMA-2 generation config
-                gen_kwargs = {
-                    "bos_token_id": 1,
-                    "max_new_tokens": 256,
-                    "num_beams": 1,
-                    "temperature": 1.0,
-                    "repetition_penalty": 1.0,
-                    "eos_token_id": 2,
-                    "pad_token_id": 1,
-                }
+                if check_model(self.model.config._name_or_path, ["qwen"]):
+                    # Qwen generation config
+                    gen_kwargs = {
+                        "c": 151643,
+                        "max_new_tokens": 256,
+                        "num_beams": 1,
+                        "temperature": 1.0,
+                        "repetition_penalty": 1.0,
+                        "eos_token_id": 151643,
+                        "pad_token_id": 151643,
+                    }
+                else:
+                    # LLaMA-2 generation config
+                    gen_kwargs = {
+                        "bos_token_id": 1,
+                        "max_new_tokens": 256,
+                        "num_beams": 1,
+                        "temperature": 1.0,
+                        "repetition_penalty": 1.0,
+                        "eos_token_id": 2,
+                        "pad_token_id": 1,
+                    }
             else:
                 # T5 generation config
                 gen_kwargs = {
