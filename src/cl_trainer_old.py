@@ -4,18 +4,6 @@ from transformers.trainer_seq2seq import Seq2SeqTrainer
 from transformers.trainer import *
 from transformers.trainer_callback import TrainerCallback
 import numpy as np
-import transformers
-from packaging import version
-
-try:
-    from transformers.trainer_pt_utils import nested_truncate
-except ImportError:
-    def nested_truncate(tensors, limit):
-        if isinstance(tensors, dict):
-            return {k: nested_truncate(v, limit) for k, v in tensors.items()}
-        if isinstance(tensors, (list, tuple)):
-            return type(tensors)(nested_truncate(t, limit) for t in tensors)
-        return tensors[:limit]
 
 from cl_collator import SUPPORTED_DECODER_MODELS, check_model
 from cl_dataset import ANSWER_PREFIX
@@ -136,7 +124,7 @@ class Trainer(Seq2SeqTrainer):
             # deepspeed handles loss scaling by gradient_accumulation_steps in its `backward`
             loss = loss / self.args.gradient_accumulation_steps
         
-        if getattr(self, 'do_grad_scaling', False):
+        if self.do_grad_scaling:
             self.scaler.scale(loss).backward()
         elif self.use_apex:
             with amp.scale_loss(loss, self.optimizer) as scaled_loss:
@@ -169,7 +157,7 @@ class Trainer(Seq2SeqTrainer):
                 if self.args.n_gpu > 1:
                     kl_loss = kl_loss.mean()  # mean() to average on multi-gpu parallel trainin
         
-                if getattr(self, 'do_grad_scaling', False):
+                if self.do_grad_scaling:
                     self.scaler.scale(kl_loss).backward()
                 elif self.use_apex:
                     with amp.scale_loss(kl_loss, self.optimizer) as scaled_loss:
@@ -254,13 +242,12 @@ class Trainer(Seq2SeqTrainer):
 
             optimizer_cls, optimizer_kwargs = Trainer.get_optimizer_cls_and_kwargs(self.args)
 
-            if version.parse(transformers.__version__) <= version.parse("4.30.2"):
-                if getattr(self, 'sharded_ddp', None) == ShardedDDPOption.SIMPLE:
-                    self.optimizer = OSS(
-                        params=optimizer_grouped_parameters,
-                        optim=optimizer_cls,
-                        **optimizer_kwargs,
-                    )
+            if self.sharded_ddp == ShardedDDPOption.SIMPLE:
+                self.optimizer = OSS(
+                    params=optimizer_grouped_parameters,
+                    optim=optimizer_cls,
+                    **optimizer_kwargs,
+                )
             else:
                 self.optimizer = optimizer_cls(optimizer_grouped_parameters, **optimizer_kwargs)
                 if optimizer_cls.__name__ == "Adam8bit":
@@ -369,11 +356,11 @@ class Trainer(Seq2SeqTrainer):
                 losses = self._nested_gather(loss.repeat(batch_size))
                 losses_host = losses if losses_host is None else torch.cat((losses_host, losses), dim=0)
             if labels is not None:
-                labels = self.accelerator.pad_across_processes(labels, dim=1, pad_index=-100)
+                labels = self._pad_across_processes(labels)
                 labels = self._nested_gather(labels)
                 labels_host = labels if labels_host is None else nested_concat(labels_host, labels, padding_index=-100)
             if logits is not None:
-                logits = self.accelerator.pad_across_processes(logits, dim=1, pad_index=-100)
+                logits = self._pad_across_processes(logits)
                 logits = self._nested_gather(logits)
                 if self.preprocess_logits_for_metrics is not None:
                     logits = self.preprocess_logits_for_metrics(logits, labels)
@@ -501,30 +488,19 @@ class Trainer(Seq2SeqTrainer):
                 "eos_token_id": 1,
                 "pad_token_id": 0,
             }
+            gen_kwargs["synced_gpus"] = False
         else:
             if inputs.get("input_ids_wo_label", None) is not None:
-                if check_model(self.model.config._name_or_path, ["qwen"]):
-                    # Qwen generation config
-                    gen_kwargs = {
-                        "bos_token_id": 151643,
-                        "max_new_tokens": 256,
-                        "num_beams": 1,
-                        "temperature": 1.0,
-                        "repetition_penalty": 1.0,
-                        "eos_token_id": 151645,
-                        "pad_token_id": 151643,
-                    }
-                else:
-                    # LLaMA-2 generation config
-                    gen_kwargs = {
-                        "bos_token_id": 1,
-                        "max_new_tokens": 256,
-                        "num_beams": 1,
-                        "temperature": 1.0,
-                        "repetition_penalty": 1.0,
-                        "eos_token_id": 2,
-                        "pad_token_id": 1,
-                    }
+                # LLaMA-2 generation config
+                gen_kwargs = {
+                    "bos_token_id": 1,
+                    "max_new_tokens": 50,
+                    "num_beams": 1,
+                    "temperature": 1.0,
+                    "repetition_penalty": 1.0,
+                    "eos_token_id": 2,
+                    "pad_token_id": 1,
+                }
             else:
                 # T5 generation config
                 gen_kwargs = {
@@ -535,10 +511,11 @@ class Trainer(Seq2SeqTrainer):
                     "eos_token_id": 2,
                     "pad_token_id": 0,
                 }
+                
+            gen_kwargs["synced_gpus"] = False
 
-        generate_kwargs = {"synced_gpus": False}
         if "attention_mask" in inputs:
-            generate_kwargs["attention_mask"] = inputs.get("attention_mask", None)
+            gen_kwargs["attention_mask"] = inputs.get("attention_mask", None)
 
         generation_config = GenerationConfig(**gen_kwargs)
 
@@ -551,7 +528,6 @@ class Trainer(Seq2SeqTrainer):
             generated_tokens = self.model.generate(
                 input_ids=generation_inputs, 
                 generation_config=generation_config,
-                **generate_kwargs,
             )
         else:
             generation_inputs = inputs[self.model.main_input_name]
@@ -561,14 +537,12 @@ class Trainer(Seq2SeqTrainer):
                     input_ids=generation_inputs,
                     input_ids_wo_label=inputs["input_ids_wo_label"],
                     generation_config=generation_config,
-                    **generate_kwargs,
                 )
             
             else:
                 generated_tokens = self.model.generate(
                     input_ids=generation_inputs,
                     generation_config=generation_config,
-                    **generate_kwargs,
                 )
 
         bs, source_len = inputs['input_ids'].shape

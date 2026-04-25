@@ -66,7 +66,7 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --successor N \
    --bf16 \
    --deepspeed $DS_CONFIG \
-   --max_train_samples 200 \
+   --max_train_samples 100 \
    --max_eval_samples 20 \
    --max_predict_samples 20
 
