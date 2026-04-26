@@ -101,6 +101,34 @@ class Trainer(Seq2SeqTrainer):
                         worker_init_fn=seed_worker)
             self.replay_iterator_dict = create_memory_replay_generators(task_order[cur_task_id], task_order, self.replay_dataloader_dict)
 
+    def _debug_lora_norms(self, model, prefix):
+        is_rank0 = not torch.distributed.is_initialized() or torch.distributed.get_rank() == 0
+        if self.state.global_step % 100 != 0 or not is_rank0:
+            return
+
+        tracked = (
+            "lora_q.lora_A",
+            "lora_q.lora_B",
+            "lora_v.lora_A",
+            "lora_v.lora_B",
+        )
+        seen = set()
+        for name, param in model.named_parameters():
+            if "previous" in name:
+                continue
+            key = next((item for item in tracked if item in name), None)
+            if key is None or key in seen:
+                continue
+            seen.add(key)
+            data_norm = param.detach().float().norm().item()
+            if param.grad is None:
+                grad_norm = None
+            else:
+                grad_norm = param.grad.detach().float().norm().item()
+            print(f"[DEBUG step={self.state.global_step}] {prefix} {name}: norm={data_norm:.8f}, grad_norm={grad_norm}")
+            if len(seen) == len(tracked):
+                break
+
     def training_step(self, model: nn.Module, inputs: Dict[str, Union[torch.Tensor, Any]]) -> torch.Tensor:
         """
         Perform a training step on a batch of inputs.
@@ -121,15 +149,7 @@ class Trainer(Seq2SeqTrainer):
         """
         model.train()
 
-        # --- DEBUG: track lora_B norm to confirm parameter updates are happening ---
-        _is_rank0 = not torch.distributed.is_initialized() or torch.distributed.get_rank() == 0
-        if self.state.global_step % 100 == 0 and _is_rank0:
-            for _name, _param in model.named_parameters():
-                if 'lora_q.lora_B' in _name and 'previous' not in _name:
-                    _norm = _param.data.float().norm().item()
-                    print(f"[DEBUG step={self.state.global_step}] {_name}: lora_B_norm={_norm:.8f}")
-                    break
-        # --- END DEBUG ---
+        self._debug_lora_norms(model, "before")
 
         inputs = self._prepare_inputs(inputs)
 
@@ -158,17 +178,7 @@ class Trainer(Seq2SeqTrainer):
         else:
             loss.backward()
 
-        # --- DEBUG: check grad norm after backward ---
-        if self.state.global_step % 100 == 0 and _is_rank0:
-            for _name, _param in model.named_parameters():
-                if 'lora_q.lora_B' in _name and 'previous' not in _name:
-                    if _param.grad is not None:
-                        _gnorm = _param.grad.float().norm().item()
-                        print(f"[DEBUG step={self.state.global_step}] {_name}: grad_norm={_gnorm:.8f}")
-                    else:
-                        print(f"[DEBUG step={self.state.global_step}] {_name}: grad=None (DeepSpeed may have cleared it)")
-                    break
-        # --- END DEBUG ---
+        self._debug_lora_norms(model, "after_backward")
 
         if self.state.global_step > self.args.replay_after_n_epoch*self.args.step_per_epoch and self.args.data_replay_freq != -1 and self.state.global_step % self.args.data_replay_freq == 0:
             for item in self.replay_iterator_dict.keys():

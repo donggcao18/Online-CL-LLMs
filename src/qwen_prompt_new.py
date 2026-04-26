@@ -389,12 +389,10 @@ class Qwen2Attention(nn.Module):
 
     def top_k_weights_keep_current(self, key_weights, top_k):
         """During training, keep task-0/current LoRA routable so it can receive gradients."""
-        if key_weights.shape[1] == 1:
-            return key_weights
-        if top_k <= 1:
-            topk_weights = torch.zeros_like(key_weights)
-            topk_weights[:, 0, :] = key_weights[:, 0, :]
-            return topk_weights / topk_weights.sum(dim=1, keepdim=True).clamp(min=1e-10)
+        if key_weights.shape[1] == 1 or top_k <= 1:
+            current_weights = torch.zeros_like(key_weights)
+            current_weights[:, 0, :] = 1.0
+            return current_weights
 
         top_k_previous = min(top_k - 1, key_weights.shape[1] - 1)
         previous_values, previous_indices = torch.topk(key_weights[:, 1:, :].squeeze(-1), top_k_previous, dim=1)
