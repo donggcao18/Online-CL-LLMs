@@ -51,7 +51,7 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --evaluation_strategy steps \
    --save_strategy steps \
    --save_total_limit 1 \
-   --lora_r 8 \
+   --lora_r 16 \
    --lora_alpha 32 \
    --lora_dropout 0.0 \
    --load_best_model_at_end \
@@ -103,13 +103,13 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --lr_scheduler_type constant \
    --warmup_steps 0 \
    --logging_strategy steps \
-   --logging_steps 10 \
+   --logging_steps 100 \
    --metric_for_best_model eval_rougeL_for_CodeTrans \
    --evaluation_strategy steps \
    --save_strategy steps \
    --save_total_limit 1 \
    --load_best_model_at_end \
-   --lora_r 8 \
+   --lora_r 16 \
    --lora_alpha 32 \
    --lora_dropout 0.0 \
    --data_replay_freq -1 \
@@ -159,13 +159,13 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --lr_scheduler_type constant \
    --warmup_steps 0 \
    --logging_strategy steps \
-   --logging_steps 10 \
+   --logging_steps 100 \
    --metric_for_best_model eval_rougeL_for_CodeSearchNet \
    --evaluation_strategy steps \
    --save_strategy steps \
    --save_total_limit 1 \
    --load_best_model_at_end \
-   --lora_r 8 \
+   --lora_r 16 \
    --lora_alpha 32 \
    --lora_dropout 0.0 \
    --data_replay_freq -1 \
@@ -216,13 +216,13 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --lr_scheduler_type constant \
    --warmup_steps 0 \
    --logging_strategy steps \
-   --logging_steps 10 \
+   --logging_steps 100 \
    --metric_for_best_model eval_rougeL_for_BFP \
    --evaluation_strategy steps \
    --save_strategy steps \
    --save_total_limit 1 \
    --load_best_model_at_end \
-   --lora_r 8 \
+   --lora_r 16 \
    --lora_alpha 32 \
    --lora_dropout 0.0 \
    --data_replay_freq -1 \
@@ -273,13 +273,13 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --lr_scheduler_type constant \
    --warmup_steps 0 \
    --logging_strategy steps \
-   --logging_steps 10 \
+   --logging_steps 100 \
    --metric_for_best_model eval_rougeL_for_KodCode \
    --evaluation_strategy steps \
    --save_strategy steps \
    --save_total_limit 1 \
    --load_best_model_at_end \
-   --lora_r 8 \
+   --lora_r 16 \
    --lora_alpha 32 \
    --lora_dropout 0.0 \
    --data_replay_freq -1 \
@@ -327,13 +327,13 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --lr_scheduler_type constant \
    --warmup_steps 0 \
    --logging_strategy steps \
-   --logging_steps 10 \
+   --logging_steps 100 \
    --metric_for_best_model eval_rougeL_for_RunBugRun \
    --evaluation_strategy steps \
    --save_strategy steps \
    --save_total_limit 1 \
    --load_best_model_at_end \
-   --lora_r 8 \
+   --lora_r 16 \
    --lora_alpha 32 \
    --lora_dropout 0.0 \
    --data_replay_freq -1 \
@@ -381,13 +381,13 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --lr_scheduler_type constant \
    --warmup_steps 0 \
    --logging_strategy steps \
-   --logging_steps 10 \
+   --logging_steps 100 \
    --metric_for_best_model eval_rougeL_for_TheVault_Csharp \
    --evaluation_strategy steps \
    --save_strategy steps \
    --save_total_limit 1 \
    --load_best_model_at_end \
-   --lora_r 8 \
+   --lora_r 16 \
    --lora_alpha 32 \
    --lora_dropout 0.0 \
    --data_replay_freq -1 \
@@ -436,13 +436,13 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --lr_scheduler_type constant \
    --warmup_steps 0 \
    --logging_strategy steps \
-   --logging_steps 10 \
+   --logging_steps 100 \
    --metric_for_best_model eval_rougeL_for_CoST \
    --evaluation_strategy steps \
    --save_strategy steps \
    --save_total_limit 1 \
    --load_best_model_at_end \
-   --lora_r 8 \
+   --lora_r 16 \
    --lora_alpha 32 \
    --lora_dropout 0.0 \
    --data_replay_freq -1 \
