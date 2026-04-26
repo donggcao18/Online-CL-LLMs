@@ -387,6 +387,28 @@ class Qwen2Attention(nn.Module):
         topk_weights = topk_weights / topk_weights.sum(dim=1, keepdim=True)
         return topk_weights
 
+    def top_k_weights_keep_current(self, key_weights, top_k):
+        """During training, keep task-0/current LoRA routable so it can receive gradients."""
+        if key_weights.shape[1] == 1:
+            return key_weights
+        if top_k <= 1:
+            topk_weights = torch.zeros_like(key_weights)
+            topk_weights[:, 0, :] = key_weights[:, 0, :]
+            return topk_weights / topk_weights.sum(dim=1, keepdim=True).clamp(min=1e-10)
+
+        top_k_previous = min(top_k - 1, key_weights.shape[1] - 1)
+        previous_values, previous_indices = torch.topk(key_weights[:, 1:, :].squeeze(-1), top_k_previous, dim=1)
+        topk_weights = torch.zeros_like(key_weights)
+        topk_weights[:, 0, :] = key_weights[:, 0, :]
+        topk_weights.scatter_(1, previous_indices.unsqueeze(-1) + 1, previous_values.unsqueeze(-1))
+        return topk_weights / topk_weights.sum(dim=1, keepdim=True).clamp(min=1e-10)
+
+    def _left_pad_count(self, input_ids):
+        pad_token_id = self.config.pad_token_id
+        if pad_token_id is None:
+            return torch.zeros((), dtype=torch.long, device=input_ids.device)
+        return (input_ids == pad_token_id).long().sum()
+
     def top_p_weights(self, key_weights, top_p, norm=True):
         if not (0.0 < top_p <= 1.0):
             raise ValueError("top_p must be in the range (0.0, 1.0].")
@@ -420,8 +442,8 @@ class Qwen2Attention(nn.Module):
             with torch.no_grad():
                 for each_q, each_ids_w, each_ids in zip(all_gpu_hidden_states, all_gpu_input_ids_wo_label, all_gpu_input_ids):
                     each_q = self.q_proj(each_q.unsqueeze(0)).squeeze(0)
-                    start = (each_ids == 1).long().sum()
-                    end = len(each_ids_w) - (each_ids_w == 1).long().sum() + (each_ids == 1).long().sum()
+                    start = self._left_pad_count(each_ids)
+                    end = len(each_ids_w) - self._left_pad_count(each_ids_w) + start
                     each_q = each_q[start:end]
                     if each_q.shape[0] == 0:
                         continue
@@ -448,8 +470,8 @@ class Qwen2Attention(nn.Module):
             with torch.no_grad():
                 for each_v, each_ids_w, each_ids in zip(all_gpu_hidden_states, all_gpu_input_ids_wo_label, all_gpu_input_ids):
                     each_v = self.v_proj(each_v.unsqueeze(0)).squeeze(0)
-                    start = (each_ids == 1).long().sum()
-                    end = len(each_ids_w) - (each_ids_w == 1).long().sum() + (each_ids == 1).long().sum()
+                    start = self._left_pad_count(each_ids)
+                    end = len(each_ids_w) - self._left_pad_count(each_ids_w) + start
                     each_v = each_v[start:end]
                     if each_v.shape[0] == 0:
                         continue
@@ -475,7 +497,9 @@ class Qwen2Attention(nn.Module):
             with torch.no_grad():
                 key_q = None
                 for each_q, each_ids_w, each_ids in zip(self.q_proj(hidden_states), input_ids_wo_label, input_ids):
-                    each_q = each_q[(each_ids == 1).long().sum():len(each_ids_w) - (each_ids_w == 1).long().sum() + (each_ids == 1).long().sum()]
+                    start = self._left_pad_count(each_ids)
+                    end = len(each_ids_w) - self._left_pad_count(each_ids_w) + start
+                    each_q = each_q[start:end]
                     each_q = torch.mean(each_q, dim=0)
                     if key_q is None:
                         key_q = each_q.unsqueeze(0)
@@ -484,7 +508,7 @@ class Qwen2Attention(nn.Module):
                 self.key_attention_weights_q = self.calculate_distances(key_q, [self.distribution_q] + self.previous_lora_distribution_q, self.distances_way, self.distances_temperature)
 
                 if self.training and self.train_key_weight_top > 0:
-                    self.key_attention_weights_q = self.top_k_weights(self.key_attention_weights_q, self.train_key_weight_top)
+                    self.key_attention_weights_q = self.top_k_weights_keep_current(self.key_attention_weights_q, self.train_key_weight_top)
                 elif (not self.training) and self.test_key_weight_top > 0:
                     self.key_attention_weights_q = self.top_k_weights(self.key_attention_weights_q, self.test_key_weight_top)
 
@@ -501,7 +525,9 @@ class Qwen2Attention(nn.Module):
             with torch.no_grad():
                 key_v = None
                 for each_v, each_ids_w, each_ids in zip(self.v_proj(hidden_states), input_ids_wo_label, input_ids):
-                    each_v = each_v[(each_ids == 1).long().sum():len(each_ids_w) - (each_ids_w == 1).long().sum() + (each_ids == 1).long().sum()]
+                    start = self._left_pad_count(each_ids)
+                    end = len(each_ids_w) - self._left_pad_count(each_ids_w) + start
+                    each_v = each_v[start:end]
                     each_v = torch.mean(each_v, dim=0)
                     if key_v is None:
                         key_v = each_v.unsqueeze(0)
@@ -510,7 +536,7 @@ class Qwen2Attention(nn.Module):
                 self.key_attention_weights_v = self.calculate_distances(key_v, [self.distribution_v] + self.previous_lora_distribution_v, self.distances_way, self.distances_temperature)
 
                 if self.training and self.train_key_weight_top > 0:
-                    self.key_attention_weights_v = self.top_k_weights(self.key_attention_weights_v, self.train_key_weight_top)
+                    self.key_attention_weights_v = self.top_k_weights_keep_current(self.key_attention_weights_v, self.train_key_weight_top)
                 elif (not self.training) and self.test_key_weight_top > 0:
                     self.key_attention_weights_v = self.top_k_weights(self.key_attention_weights_v, self.test_key_weight_top)
 
