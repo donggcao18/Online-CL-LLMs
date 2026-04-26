@@ -164,7 +164,7 @@ class DataCollator:
                 tokenized_label=tokenized_label[:self.max_target_length]
 
             # (input) for inference, (input + label) for training
-            if instance['subset'] in ['dev', 'test']:
+            if instance['subset'] in ['dev', 'test', 'validation']:
                 input_ids.append(tokenized_input)
                 input_ids_wo_label.append(tokenized_input)
                 labels.append([self.label_pad_token_id]*len(tokenized_input))

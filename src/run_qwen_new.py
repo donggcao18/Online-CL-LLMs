@@ -47,7 +47,7 @@ from transformers.trainer_utils import get_last_checkpoint
 
 from cl_collator import DataCollator
 from cl_dataset import gen_cache_path, GaussianDistribution
-from qwen_prompt_new import QwenForCausalLM
+from qwen_prompt_new import Qwen2ForCausalLM
 from assets import task_config, lora_state_dict_A, lora_state_dict_B,lora_state_dict_distribution
 
 from cl_trainer import Trainer, DenserEvalCallback, skip_instructions
@@ -443,30 +443,21 @@ def main():
     print(raw_datasets)
 
     config = AutoConfig.from_pretrained(
-        model_args.config_name if model_args.config_name else model_args.model_name_or_path,
+        model_args.model_name_or_path,
         cache_dir=model_args.cache_dir,
         revision=model_args.model_revision,
         use_auth_token=True if model_args.use_auth_token else None,
     )
     tokenizer = AutoTokenizer.from_pretrained(
-        model_args.tokenizer_name if model_args.tokenizer_name else model_args.model_name_or_path,
+        model_args.model_name_or_path,
         cache_dir = model_args.cache_dir,
         use_fast = model_args.use_fast_tokenizer,
         revision = model_args.model_revision,
         use_auth_token = True if model_args.use_auth_token else None,
+        padding_side = 'left',
     )
     if tokenizer.pad_token_id is None:
-        if tokenizer.eos_token is not None:
-            tokenizer.pad_token = tokenizer.eos_token
-        elif tokenizer.unk_token is not None:
-            tokenizer.pad_token = tokenizer.unk_token
-
-    if config.bos_token_id is None and tokenizer.bos_token_id is not None:
-        config.bos_token_id = tokenizer.bos_token_id
-    if config.eos_token_id is None and tokenizer.eos_token_id is not None:
-        config.eos_token_id = tokenizer.eos_token_id
-    if config.pad_token_id is None and tokenizer.pad_token_id is not None:
-        config.pad_token_id = tokenizer.pad_token_id
+        tokenizer.pad_token_id = tokenizer.eos_token_id
 
     if model_args.successor != 'N':
         lst = model_args.successor.split(',')
@@ -497,7 +488,7 @@ def main():
         'successor':model_args.successor
     }
 
-    model = QwenForCausalLM.from_pretrained(
+    model = Qwen2ForCausalLM.from_pretrained(
         model_args.model_name_or_path,
         prompt_config,
         from_tf=bool(".ckpt" in model_args.model_name_or_path),
@@ -510,12 +501,8 @@ def main():
     
     model.resize_token_embeddings(len(tokenizer))
 
-    if model.generation_config.bos_token_id is None and tokenizer.bos_token_id is not None:
-        model.generation_config.bos_token_id = tokenizer.bos_token_id
-    if model.generation_config.eos_token_id is None and tokenizer.eos_token_id is not None:
-        model.generation_config.eos_token_id = tokenizer.eos_token_id
     if model.generation_config.pad_token_id is None:
-        model.generation_config.pad_token_id = tokenizer.pad_token_id if tokenizer.pad_token_id is not None else tokenizer.eos_token_id
+        model.generation_config.pad_token_id = tokenizer.pad_token_id
 
     if model_args.previous_lora_path:
         previous_lora_list = model_args.previous_lora_path.split(',')

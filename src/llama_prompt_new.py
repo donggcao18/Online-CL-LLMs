@@ -433,16 +433,14 @@ class LlamaAttention(nn.Module):
             with torch.no_grad():
                 for each_q,each_ids_w,each_ids in zip(all_gpu_hidden_states,all_gpu_input_ids_wo_label,all_gpu_input_ids):
                     each_q=self.q_proj(each_q.unsqueeze(0)).squeeze(0)
-                    each_q=each_q[(each_ids==1).long().sum():len(each_ids_w)-(each_ids_w==1).long().sum()+(each_ids==1).long().sum()]
+                    start = (each_ids==1).long().sum()
+                    end = len(each_ids_w)-(each_ids_w==1).long().sum()+(each_ids==1).long().sum()
+                    each_q=each_q[start:end]
+                    if each_q.shape[0] == 0:
+                        continue
                     each_q=torch.mean(each_q,dim=0)
                     if torch.isnan(each_q).any():
-                        torch.set_printoptions(edgeitems=1000)
-                        print(each_q)
-                        print(each_ids_w)
-                        print(each_ids)
-                        raise ValueError(
-                            f"/0 error"
-                        )
+                        continue
                     self.distribution_q.update(each_q)
                     self.up_q_list.append(each_q)
         if (self.distribution_q is not None) and self.training:
@@ -467,15 +465,14 @@ class LlamaAttention(nn.Module):
             with torch.no_grad():
                 for each_v,each_ids_w,each_ids in zip(all_gpu_hidden_states,all_gpu_input_ids_wo_label,all_gpu_input_ids):
                     each_v=self.v_proj(each_v.unsqueeze(0)).squeeze(0)
-                    each_v=each_v[(each_ids==1).long().sum():len(each_ids_w)-(each_ids_w==1).long().sum()+(each_ids==1).long().sum()]
+                    start = (each_ids==1).long().sum()
+                    end = len(each_ids_w)-(each_ids_w==1).long().sum()+(each_ids==1).long().sum()
+                    each_v=each_v[start:end]
+                    if each_v.shape[0] == 0:
+                        continue
                     each_v=torch.mean(each_v,dim=0)
                     if torch.isnan(each_v).any():
-                        print(each_v)
-                        print(each_ids_w)
-                        print(each_ids)
-                        raise ValueError(
-                            f"/0 error"
-                        )
+                        continue
                     self.distribution_v.update(each_v)
                     self.up_v_list.append(each_v)
         if (self.distribution_v is not None) and self.training:
