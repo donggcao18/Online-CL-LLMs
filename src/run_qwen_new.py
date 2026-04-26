@@ -642,6 +642,7 @@ def main():
         if "validation" not in raw_datasets:
             raise ValueError("--do_eval requires a validation dataset")
         eval_dataset = raw_datasets["validation"]
+        eval_dataset = eval_dataset.filter(lambda x: x["Dataset"] == cur_task)
         if data_args.max_eval_samples is not None:
             eval_dataset = eval_dataset.select(range(data_args.max_eval_samples))
 
@@ -776,6 +777,26 @@ def main():
     num_beams = data_args.num_beams if data_args.num_beams is not None else training_args.generation_num_beams
     repetition_penalty = data_args.repetition_penalty
 
+    if training_args.do_eval:
+        print("*** Evaluate ***")
+        logger.info("*** Evaluate ***")
+
+        model.model.is_inference = True
+        eval_results = trainer.evaluate(
+            eval_dataset=eval_dataset,
+            metric_key_prefix="eval",
+        )
+        model.model.is_inference = False
+
+        max_eval_samples = (
+            data_args.max_eval_samples if data_args.max_eval_samples is not None else len(eval_dataset)
+        )
+        eval_results["eval_samples"] = min(max_eval_samples, len(eval_dataset))
+
+        trainer.log_metrics("eval", eval_results)
+        trainer.save_metrics("eval", eval_results)
+        all_metrics.update(eval_results)
+
     if training_args.do_predict:
         print("*** Prediction ***")
         logger.info("*** Prediction ***")
@@ -784,23 +805,11 @@ def main():
         if data_args.max_predict_samples is not None:
             predict_dataset = predict_dataset.select(range(data_args.max_predict_samples))
 
-        model.model.is_inference = True
-        _ = trainer.predict(
-            eval_dataset,
-            metric_key_prefix="predict",
-            max_new_tokens=max_new_tokens,
-            num_beams=num_beams,
-            repetition_penalty=repetition_penalty,
-            pad_token_id=tokenizer.pad_token_id
-        )
-        model.model.is_inference = False
-
         if world_size > 1:
             rank = torch.distributed.get_rank()
             is_main_process = rank == 0
         else:
             is_main_process = 1
-
 
         model.model.is_inference = True
         predict_results = trainer.predict(
