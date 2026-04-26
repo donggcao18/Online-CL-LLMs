@@ -1,5 +1,5 @@
 torch==2.1.0
-transformers==4.30.2
+transformers==4.37.2
 pandas==1.5.3
 numpy==1.22.2
 pyarrow==11.0.0
