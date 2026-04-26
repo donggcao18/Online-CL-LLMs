@@ -152,7 +152,7 @@ class DataCollator:
             instruction = self.get_instruction(instance)
 
             # add bos and eos
-            task_input = instruction
+            task_input = f"Input: {instruction}\nOutput:"
             label = label + self.tokenizer.eos_token
 
             tokenized_input = self.tokenizer(task_input, add_special_tokens=False)["input_ids"]
