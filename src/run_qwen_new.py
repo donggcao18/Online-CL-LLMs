@@ -504,6 +504,11 @@ def main():
     if model.generation_config.pad_token_id is None:
         model.generation_config.pad_token_id = tokenizer.pad_token_id
 
+    # Ensure model.config.pad_token_id matches the tokenizer so the attention
+    # layer slice logic (which reads self.config.pad_token_id) uses the same
+    # pad id as the collator (which uses tokenizer.pad_token_id).
+    model.config.pad_token_id = tokenizer.pad_token_id
+
     if model_args.previous_lora_path:
         previous_lora_list = model_args.previous_lora_path.split(',')
         previous_lora_list.reverse()

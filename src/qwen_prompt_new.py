@@ -420,8 +420,9 @@ class Qwen2Attention(nn.Module):
             with torch.no_grad():
                 for each_q, each_ids_w, each_ids in zip(all_gpu_hidden_states, all_gpu_input_ids_wo_label, all_gpu_input_ids):
                     each_q = self.q_proj(each_q.unsqueeze(0)).squeeze(0)
-                    start = (each_ids == 1).long().sum()
-                    end = len(each_ids_w) - (each_ids_w == 1).long().sum() + (each_ids == 1).long().sum()
+                    pad_id = self.config.pad_token_id
+                    start = (each_ids == pad_id).long().sum()
+                    end = len(each_ids_w) - (each_ids_w == pad_id).long().sum() + (each_ids == pad_id).long().sum()
                     each_q = each_q[start:end]
                     if each_q.shape[0] == 0:
                         continue
@@ -448,8 +449,9 @@ class Qwen2Attention(nn.Module):
             with torch.no_grad():
                 for each_v, each_ids_w, each_ids in zip(all_gpu_hidden_states, all_gpu_input_ids_wo_label, all_gpu_input_ids):
                     each_v = self.v_proj(each_v.unsqueeze(0)).squeeze(0)
-                    start = (each_ids == 1).long().sum()
-                    end = len(each_ids_w) - (each_ids_w == 1).long().sum() + (each_ids == 1).long().sum()
+                    pad_id = self.config.pad_token_id
+                    start = (each_ids == pad_id).long().sum()
+                    end = len(each_ids_w) - (each_ids_w == pad_id).long().sum() + (each_ids == pad_id).long().sum()
                     each_v = each_v[start:end]
                     if each_v.shape[0] == 0:
                         continue
@@ -475,7 +477,8 @@ class Qwen2Attention(nn.Module):
             with torch.no_grad():
                 key_q = None
                 for each_q, each_ids_w, each_ids in zip(self.q_proj(hidden_states), input_ids_wo_label, input_ids):
-                    each_q = each_q[(each_ids == 1).long().sum():len(each_ids_w) - (each_ids_w == 1).long().sum() + (each_ids == 1).long().sum()]
+                    pad_id = self.config.pad_token_id
+                    each_q = each_q[(each_ids == pad_id).long().sum():len(each_ids_w) - (each_ids_w == pad_id).long().sum() + (each_ids == pad_id).long().sum()]
                     each_q = torch.mean(each_q, dim=0)
                     if key_q is None:
                         key_q = each_q.unsqueeze(0)
@@ -501,7 +504,8 @@ class Qwen2Attention(nn.Module):
             with torch.no_grad():
                 key_v = None
                 for each_v, each_ids_w, each_ids in zip(self.v_proj(hidden_states), input_ids_wo_label, input_ids):
-                    each_v = each_v[(each_ids == 1).long().sum():len(each_ids_w) - (each_ids_w == 1).long().sum() + (each_ids == 1).long().sum()]
+                    pad_id = self.config.pad_token_id
+                    each_v = each_v[(each_ids == pad_id).long().sum():len(each_ids_w) - (each_ids_w == pad_id).long().sum() + (each_ids == pad_id).long().sum()]
                     each_v = torch.mean(each_v, dim=0)
                     if key_v is None:
                         key_v = each_v.unsqueeze(0)
