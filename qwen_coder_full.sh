@@ -20,7 +20,6 @@ DS_CONFIG="configs/ds_configs/stage2.config"
 
 deepspeed --num_gpus=2 src/run_qwen_new.py \
    --do_train \
-   --do_predict \
    --do_eval \
    --predict_with_generate \
    --model_name_or_path Qwen/Qwen2.5-Coder-1.5B \
@@ -66,17 +65,14 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --test_key_weight_top_p -1.0 \
    --successor N \
    --bf16 \
-   --deepspeed $DS_CONFIG \
-   --max_train_samples 100 \
-   --max_eval_samples 20 \
-   --max_predict_samples 20
+   --deepspeed $DS_CONFIG 
+
 
 rm -rf logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/1-CONCODE/checkpoint*
 
 
 deepspeed --num_gpus=2 src/run_qwen_new.py \
    --do_train \
-   --do_predict \
    --do_eval \
    --predict_with_generate \
    --model_name_or_path Qwen/Qwen2.5-Coder-1.5B \
@@ -125,10 +121,7 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --train_key_weight_top_p -1.0 \
    --test_key_weight_top_p -1.0 \
    --successor N \
-   --deepspeed $DS_CONFIG \
-   --max_train_samples 200 \
-   --max_eval_samples 20 \
-   --max_predict_samples 20
+   --deepspeed $DS_CONFIG 
 
 rm -rf logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/2-CodeTrans/checkpoint*
 
@@ -136,7 +129,6 @@ rm -rf logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1
 
 deepspeed --num_gpus=2 src/run_qwen_new.py \
    --do_train \
-   --do_predict \
    --do_eval \
    --predict_with_generate \
    --model_name_or_path Qwen/Qwen2.5-Coder-1.5B \
@@ -185,10 +177,7 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --train_key_weight_top_p -1.0 \
    --test_key_weight_top_p -1.0 \
    --successor N \
-   --deepspeed $DS_CONFIG \
-   --max_train_samples 200 \
-   --max_eval_samples 20 \
-   --max_predict_samples 20
+   --deepspeed $DS_CONFIG 
 
 rm -rf logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/3-CodeSearchNet/checkpoint*
 
@@ -245,7 +234,7 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --train_key_weight_top_p -1.0 \
    --test_key_weight_top_p -1.0 \
    --successor N \
---deepspeed $DS_CONFIG 
+   --deepspeed $DS_CONFIG 
 
 rm -rf logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/4-BFP/checkpoint*
 
@@ -254,7 +243,6 @@ rm -rf logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1
 
 deepspeed --num_gpus=2 src/run_qwen_new.py \
    --do_train \
-   --do_predict \
    --do_eval \
    --predict_with_generate \
    --model_name_or_path Qwen/Qwen2.5-Coder-1.5B \
@@ -275,9 +263,9 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --run_name test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0 \
    --distances_temperature 1.0 \
    --distances_way L2 \
-   --max_source_length 130 \
-   --max_target_length 120 \
-   --generation_max_length 120 \
+   --max_source_length 512 \
+   --max_target_length 300 \
+   --generation_max_length 300 \
    --add_task_name False \
    --add_dataset_name False \
    --overwrite_output_dir \
@@ -303,13 +291,12 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --train_key_weight_top_p -1.0 \
    --test_key_weight_top_p -1.0 \
    --successor N \
---deepspeed $DS_CONFIG 
+   --deepspeed $DS_CONFIG 
 
 rm -rf logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/5-KodCode/checkpoint*
 
 deepspeed --num_gpus=2 src/run_qwen_new.py \
    --do_train \
-   --do_predict \
    --do_eval \
    --predict_with_generate \
    --model_name_or_path Qwen/Qwen2.5-Coder-1.5B \
@@ -330,9 +317,9 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --run_name test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0 \
    --distances_temperature 1.0 \
    --distances_way L2 \
-   --max_source_length 130 \
-   --max_target_length 120 \
-   --generation_max_length 120 \
+   --max_source_length 256 \
+   --max_target_length 128 \
+   --generation_max_length 128 \
    --add_task_name False \
    --add_dataset_name False \
    --overwrite_output_dir \
@@ -358,13 +345,12 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --train_key_weight_top_p -1.0 \
    --test_key_weight_top_p -1.0 \
    --successor N \
---deepspeed $DS_CONFIG 
+   --deepspeed $DS_CONFIG 
 
 rm -rf logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/6-RunBugRun/checkpoint*
 
 deepspeed --num_gpus=2 src/run_qwen_new.py \
    --do_train \
-   --do_predict \
    --do_eval \
    --predict_with_generate \
    --model_name_or_path Qwen/Qwen2.5-Coder-1.5B \
@@ -385,9 +371,9 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --run_name test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0 \
    --distances_temperature 1.0 \
    --distances_way L2 \
-   --max_source_length 130 \
-   --max_target_length 120 \
-   --generation_max_length 120 \
+   --max_source_length 256 \
+   --max_target_length 128 \
+   --generation_max_length 128 \
    --add_task_name False \
    --add_dataset_name False \
    --overwrite_output_dir \
@@ -413,7 +399,7 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --train_key_weight_top_p -1.0 \
    --test_key_weight_top_p -1.0 \
    --successor N \
---deepspeed $DS_CONFIG 
+   --deepspeed $DS_CONFIG 
 
 rm -rf logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/7-TheVault_Csharp/checkpoint*
 
@@ -440,9 +426,9 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --run_name test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0 \
    --distances_temperature 1.0 \
    --distances_way L2 \
-   --max_source_length 130 \
-   --max_target_length 120 \
-   --generation_max_length 120 \
+   --max_source_length 256 \
+   --max_target_length 128 \
+   --generation_max_length 128 \
    --add_task_name False \
    --add_dataset_name False \
    --overwrite_output_dir \
@@ -468,7 +454,7 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --train_key_weight_top_p -1.0 \
    --test_key_weight_top_p -1.0 \
    --successor N \
---deepspeed $DS_CONFIG 
+   --deepspeed $DS_CONFIG 
 
 rm -rf logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/8-CoST/checkpoint*
 
