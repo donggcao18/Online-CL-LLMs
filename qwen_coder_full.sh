@@ -253,9 +253,9 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --gen_data_dir generated_data/lora_gen_superni_llama \
    --task_config_dir configs/CodeTask/KodCode \
    --output_dir logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/5-KodCode \
-   --per_device_eval_batch_size 16 \
-   --per_device_eval_batch_size 16 \
-   --gradient_accumulation_steps 1 \
+   --per_device_eval_batch_size 8 \
+   --per_device_eval_batch_size 8 \
+   --gradient_accumulation_steps 2 \
    --learning_rate 3e-04 \
    --attn_lr 0.0 \
    --num_train_epochs 3 \
