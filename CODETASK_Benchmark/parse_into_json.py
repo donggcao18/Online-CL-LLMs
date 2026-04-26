@@ -4,8 +4,7 @@ import hashlib
 import numpy as np
 from typing import Any, Dict
 from datasets import load_dataset, concatenate_datasets
-from tqdm import tqdm
-from CODETASK_Benchmark.task_info import TASK_SPECS, HF_SPLIT_MAP, INSTRUCTION_POOL, TRAIN_ONLY_TASKS, TASK_LIST, INSTRUCTION_SPLIT_POLICY
+from task_info import TASK_SPECS, HF_SPLIT_MAP, INSTRUCTION_POOL, TRAIN_ONLY_TASKS, TASK_LIST, INSTRUCTION_SPLIT_POLICY
 FOLDER_NAME = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -38,7 +37,7 @@ def _load_task_split(task, split_name, split_seed=42):
         }
         dataset_dict = load_dataset(
             spec['dataset_name'],
-            languages=['c_sharp'],
+            languages=['c#'],
             split_set=split_map[split_name],
         )
         return concatenate_datasets(list(dataset_dict.values()))
@@ -116,7 +115,14 @@ class CodeTaskPreprocessor:
         return s
 
 
-def convert_to_codetask(split_name="train", split_seed=42, max_dev_samples=1000, max_test_samples=1000, max_train_samples=None):
+def convert_to_codetask(
+    split_name="train",
+    split_seed=42,
+    max_dev_samples=1000,
+    max_test_samples=1000,
+    max_train_samples=None,
+    use_instruction_pool=True,
+):
     if split_name not in HF_SPLIT_MAP:
         raise ValueError(f"Unsupported split_name '{split_name}'. Use one of {list(HF_SPLIT_MAP.keys())}")
 
@@ -157,7 +163,7 @@ def convert_to_codetask(split_name="train", split_seed=42, max_dev_samples=1000,
             text_key = TASK_SPECS[task]['text_key']
             label_key = TASK_SPECS[task]['label_key']
 
-            for example in tqdm(dataset, desc=f"Processing {task}::{split_name}"):
+            for example in dataset:
                 input_text = _to_string(example.get(text_key))
                 if task == 'CodeSearchNet':
                     output_text = CodeTaskPreprocessor._extract_first_paragraph(example.get(label_key))
@@ -165,13 +171,17 @@ def convert_to_codetask(split_name="train", split_seed=42, max_dev_samples=1000,
                     output_text = _to_string(example.get(label_key))
 
                 uid = hashlib.md5((task + "||" + input_text).encode("utf-8")).hexdigest()
-                instruction_input = _render_instruction(
-                    task=task,
-                    raw_input=input_text,
-                    sample_key=f"{task}::{uid}",
-                    split_name=split_name,
-                    split_seed=split_seed,
-                )
+                if use_instruction_pool:
+                    instruction_input = _render_instruction(
+                        task=task,
+                        raw_input=input_text,
+                        sample_key=f"{task}::{uid}",
+                        split_name=split_name,
+                        split_seed=split_seed,
+                    )
+                else:
+                    definition = _to_string(TASK_SPECS[task]['definition']).strip()
+                    instruction_input = f"{definition}\n{input_text}".strip()
 
                 output_data["Instances"].append({
                     "id": f"{task}-{uid}",
@@ -189,4 +199,11 @@ def convert_to_codetask(split_name="train", split_seed=42, max_dev_samples=1000,
 if __name__ == "__main__":
     np.random.seed(42)
     for split in ["train", "validation", "test"]:
-        convert_to_codetask(split_name=split, split_seed=42, max_dev_samples=1000, max_test_samples=5000, max_train_samples=100000)
+        convert_to_codetask(
+            split_name=split,
+            split_seed=42,
+            max_dev_samples=1000,
+            max_test_samples=5000,
+            max_train_samples=100000,
+            use_instruction_pool=True,
+        )
