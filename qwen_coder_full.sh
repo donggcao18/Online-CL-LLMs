@@ -47,14 +47,11 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --warmup_steps 0 \
    --logging_strategy steps \
    --logging_steps 100 \
-   --metric_for_best_model eval_rougeL \
-   --evaluation_strategy steps \
-   --save_strategy steps \
-   --save_total_limit 1 \
+   --evaluation_strategy no \
+   --save_strategy no \
    --lora_r 16 \
    --lora_alpha 32 \
    --lora_dropout 0.0 \
-   --load_best_model_at_end \
    --data_replay_freq -1 \
    --replay_after_n_epoch 0 \
    --kl_ratio 1 \
@@ -104,11 +101,8 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --warmup_steps 0 \
    --logging_strategy steps \
    --logging_steps 100 \
-   --metric_for_best_model eval_rougeL_for_CodeTrans \
-   --evaluation_strategy steps \
-   --save_strategy steps \
-   --save_total_limit 1 \
-   --load_best_model_at_end \
+   --evaluation_strategy no \
+   --save_strategy no \
    --lora_r 16 \
    --lora_alpha 32 \
    --lora_dropout 0.0 \
@@ -160,11 +154,8 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --warmup_steps 0 \
    --logging_strategy steps \
    --logging_steps 100 \
-   --metric_for_best_model eval_rougeL_for_CodeSearchNet \
-   --evaluation_strategy steps \
-   --save_strategy steps \
-   --save_total_limit 1 \
-   --load_best_model_at_end \
+   --evaluation_strategy no \
+   --save_strategy no \
    --lora_r 16 \
    --lora_alpha 32 \
    --lora_dropout 0.0 \
@@ -217,11 +208,8 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --warmup_steps 0 \
    --logging_strategy steps \
    --logging_steps 100 \
-   --metric_for_best_model eval_rougeL_for_BFP \
-   --evaluation_strategy steps \
-   --save_strategy steps \
-   --save_total_limit 1 \
-   --load_best_model_at_end \
+   --evaluation_strategy no \
+   --save_strategy no \
    --lora_r 16 \
    --lora_alpha 32 \
    --lora_dropout 0.0 \
@@ -253,7 +241,7 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --gen_data_dir generated_data/lora_gen_superni_llama \
    --task_config_dir configs/CodeTask/KodCode \
    --output_dir logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/5-KodCode \
-   --per_device_eval_batch_size 8 \
+   --per_device_train_batch_size 8 \
    --per_device_eval_batch_size 8 \
    --gradient_accumulation_steps 2 \
    --learning_rate 1e-04 \
@@ -274,11 +262,8 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --warmup_steps 0 \
    --logging_strategy steps \
    --logging_steps 100 \
-   --metric_for_best_model eval_rougeL_for_KodCode \
-   --evaluation_strategy steps \
-   --save_strategy steps \
-   --save_total_limit 1 \
-   --load_best_model_at_end \
+   --evaluation_strategy no \
+   --save_strategy no \
    --lora_r 16 \
    --lora_alpha 32 \
    --lora_dropout 0.0 \
@@ -307,7 +292,7 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --gen_data_dir generated_data/lora_gen_superni_llama \
    --task_config_dir configs/CodeTask/RunBugRun \
    --output_dir logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/6-RunBugRun \
-   --per_device_eval_batch_size 16 \
+   --per_device_train_batch_size 16 \
    --per_device_eval_batch_size 16 \
    --gradient_accumulation_steps 1 \
    --learning_rate 1e-04 \
@@ -328,11 +313,8 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --warmup_steps 0 \
    --logging_strategy steps \
    --logging_steps 100 \
-   --metric_for_best_model eval_rougeL_for_RunBugRun \
-   --evaluation_strategy steps \
-   --save_strategy steps \
-   --save_total_limit 1 \
-   --load_best_model_at_end \
+   --evaluation_strategy no \
+   --save_strategy no \
    --lora_r 16 \
    --lora_alpha 32 \
    --lora_dropout 0.0 \
@@ -361,7 +343,7 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --gen_data_dir generated_data/lora_gen_superni_llama \
    --task_config_dir configs/CodeTask/TheVault_Csharp \
    --output_dir logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/7-TheVault_Csharp \
-   --per_device_eval_batch_size 16 \
+   --per_device_train_batch_size 16 \
    --per_device_eval_batch_size 16 \
    --gradient_accumulation_steps 1 \
    --learning_rate 1e-04 \
@@ -382,11 +364,8 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --warmup_steps 0 \
    --logging_strategy steps \
    --logging_steps 100 \
-   --metric_for_best_model eval_rougeL_for_TheVault_Csharp \
-   --evaluation_strategy steps \
-   --save_strategy steps \
-   --save_total_limit 1 \
-   --load_best_model_at_end \
+   --evaluation_strategy no \
+   --save_strategy no \
    --lora_r 16 \
    --lora_alpha 32 \
    --lora_dropout 0.0 \
@@ -416,7 +395,7 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --gen_data_dir generated_data/lora_gen_superni_llama \
    --task_config_dir configs/CodeTask/CoST \
    --output_dir logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/8-CoST \
-   --per_device_eval_batch_size 16 \
+   --per_device_train_batch_size 16 \
    --per_device_eval_batch_size 16 \
    --gradient_accumulation_steps 1 \
    --learning_rate 1e-04 \
@@ -437,11 +416,8 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --warmup_steps 0 \
    --logging_strategy steps \
    --logging_steps 100 \
-   --metric_for_best_model eval_rougeL_for_CoST \
-   --evaluation_strategy steps \
-   --save_strategy steps \
-   --save_total_limit 1 \
-   --load_best_model_at_end \
+   --evaluation_strategy no \
+   --save_strategy no \
    --lora_r 16 \
    --lora_alpha 32 \
    --lora_dropout 0.0 \

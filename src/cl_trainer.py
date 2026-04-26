@@ -120,7 +120,17 @@ class Trainer(Seq2SeqTrainer):
             `torch.Tensor`: The tensor with training loss on this batch.
         """
         model.train()
-        
+
+        # --- DEBUG: track lora_B norm to confirm parameter updates are happening ---
+        _is_rank0 = not torch.distributed.is_initialized() or torch.distributed.get_rank() == 0
+        if self.state.global_step % 100 == 0 and _is_rank0:
+            for _name, _param in model.named_parameters():
+                if 'lora_q.lora_B' in _name and 'previous' not in _name:
+                    _norm = _param.data.float().norm().item()
+                    print(f"[DEBUG step={self.state.global_step}] {_name}: lora_B_norm={_norm:.8f}")
+                    break
+        # --- END DEBUG ---
+
         inputs = self._prepare_inputs(inputs)
 
         if is_sagemaker_mp_enabled():
@@ -147,7 +157,19 @@ class Trainer(Seq2SeqTrainer):
             self.accelerator.backward(loss)
         else:
             loss.backward()
-        
+
+        # --- DEBUG: check grad norm after backward ---
+        if self.state.global_step % 100 == 0 and _is_rank0:
+            for _name, _param in model.named_parameters():
+                if 'lora_q.lora_B' in _name and 'previous' not in _name:
+                    if _param.grad is not None:
+                        _gnorm = _param.grad.float().norm().item()
+                        print(f"[DEBUG step={self.state.global_step}] {_name}: grad_norm={_gnorm:.8f}")
+                    else:
+                        print(f"[DEBUG step={self.state.global_step}] {_name}: grad=None (DeepSpeed may have cleared it)")
+                    break
+        # --- END DEBUG ---
+
         if self.state.global_step > self.args.replay_after_n_epoch*self.args.step_per_epoch and self.args.data_replay_freq != -1 and self.state.global_step % self.args.data_replay_freq == 0:
             for item in self.replay_iterator_dict.keys():
                 generator_mem1 = self.replay_iterator_dict[item]
