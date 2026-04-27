@@ -6,7 +6,7 @@ from transformers.data.data_collator import *
 
 logger = logging.getLogger(__name__)
 
-SUPPORTED_DECODER_MODELS = ['llama']
+SUPPORTED_DECODER_MODELS = ['llama', 'qwen']
 SUPPORTED_SEQ2SEQ_MODELS = ['t5']
 
 def check_model(model_name, supported_models):
@@ -38,7 +38,7 @@ class DataCollator:
     return_tensors: str = "pt"
     add_task_name: bool = False
     add_dataset_name: bool = False
-    add_instruction_replay: bool = True
+    add_instruction_replay: bool = False
     common_dataset_name: str = None
     text_only: bool = False
     num_examples: int = 0
@@ -48,7 +48,7 @@ class DataCollator:
         if return_tensors is None:
             return_tensors = self.return_tensors
 
-        model_name = self.model.config._name_or_path
+        model_name = f"{getattr(self.model.config, '_name_or_path', '')} {getattr(self.model.config, 'model_type', '')}"
         # print(model_name)
         if check_model(model_name, SUPPORTED_DECODER_MODELS):
             model_inputs = self.decoder_call(batch, return_tensors)
@@ -88,8 +88,7 @@ class DataCollator:
                 instruction = instruction.format(content)
             finally:
                 return instruction
-        else:
-            return instruction
+        return content
 
 
     def seq2seq_call(self, batch, return_tensors):
@@ -153,7 +152,7 @@ class DataCollator:
             instruction = self.get_instruction(instance)
 
             # add bos and eos
-            task_input = instruction
+            task_input = f"Input: {instruction}\nOutput:"
             label = label + self.tokenizer.eos_token
 
             tokenized_input = self.tokenizer(task_input, add_special_tokens=False)["input_ids"]
@@ -165,7 +164,7 @@ class DataCollator:
                 tokenized_label=tokenized_label[:self.max_target_length]
 
             # (input) for inference, (input + label) for training
-            if instance['subset'] in ['dev', 'test']:
+            if instance['subset'] in ['dev', 'test', 'validation']:
                 input_ids.append(tokenized_input)
                 input_ids_wo_label.append(tokenized_input)
                 labels.append([self.label_pad_token_id]*len(tokenized_input))

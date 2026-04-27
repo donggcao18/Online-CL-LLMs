@@ -4,6 +4,18 @@ from transformers.trainer_seq2seq import Seq2SeqTrainer
 from transformers.trainer import *
 from transformers.trainer_callback import TrainerCallback
 import numpy as np
+import transformers
+from packaging import version
+
+try:
+    from transformers.trainer_pt_utils import nested_truncate
+except ImportError:
+    def nested_truncate(tensors, limit):
+        if isinstance(tensors, dict):
+            return {k: nested_truncate(v, limit) for k, v in tensors.items()}
+        if isinstance(tensors, (list, tuple)):
+            return type(tensors)(nested_truncate(t, limit) for t in tensors)
+        return tensors[:limit]
 
 from cl_collator import SUPPORTED_DECODER_MODELS, check_model
 from cl_dataset import ANSWER_PREFIX
@@ -17,7 +29,8 @@ def skip_instructions(model, predictions_ids, tokenizer, ignore_idx=-100):
     )
 
     final_predictions = []
-    if check_model(model.config._name_or_path, SUPPORTED_DECODER_MODELS):
+    model_name = f"{getattr(model.config, '_name_or_path', '')} {getattr(model.config, 'model_type', '')}"
+    if check_model(model_name, SUPPORTED_DECODER_MODELS):
         for pred in predictions:
             if ANSWER_PREFIX in pred:
                 splits = pred.split(ANSWER_PREFIX)
@@ -88,9 +101,46 @@ class Trainer(Seq2SeqTrainer):
                         worker_init_fn=seed_worker)
             self.replay_iterator_dict = create_memory_replay_generators(task_order[cur_task_id], task_order, self.replay_dataloader_dict)
 
-    def training_step(self, 
-                    model: nn.Module, 
-                    inputs: Dict[str, Union[torch.Tensor, Any]]) -> torch.Tensor:
+    def _debug_lora_norms(self, model, prefix):
+        is_rank0 = not torch.distributed.is_initialized() or torch.distributed.get_rank() == 0
+        if self.state.global_step % 100 != 0 or not is_rank0:
+            return
+
+        tracked = (
+            "lora_q.lora_A",
+            "lora_q.lora_B",
+            "lora_v.lora_A",
+            "lora_v.lora_B",
+        )
+        seen = set()
+        for name, param in model.named_parameters():
+            if "previous" in name:
+                continue
+            key = next((item for item in tracked if item in name), None)
+            if key is None or key in seen:
+                continue
+            seen.add(key)
+            data_norm = param.detach().float().norm().item()
+            # NOTE: With DeepSpeed ZeRO-2 (reduce_scatter=true + contiguous_gradients=true),
+            # param.grad is zeroed/nulled after backward because DS moves grads to its
+            # internal partitioned flat buffer. grad_norm=0.0 here does NOT mean the
+            # gradient is truly zero — DS has already consumed it.
+            # Use data_norm_drift below to confirm parameters are actually being updated.
+            if param.grad is None:
+                grad_norm = None
+            else:
+                grad_norm = param.grad.detach().float().norm().item()
+            prev_key = f"_prev_data_norm_{key.replace('.', '_')}"
+            prev_norm = getattr(self, prev_key, None)
+            drift = None if prev_norm is None else (data_norm - prev_norm)
+            if prefix == "before":
+                setattr(self, prev_key, data_norm)
+            print(f"[DEBUG step={self.state.global_step}] {prefix} {name}: "
+                  f"data_norm={data_norm:.8f}, grad_norm={grad_norm}, data_norm_drift={drift}")
+            if len(seen) == len(tracked):
+                break
+
+    def training_step(self, model: nn.Module, inputs: Dict[str, Union[torch.Tensor, Any]]) -> torch.Tensor:
         """
         Perform a training step on a batch of inputs.
 
@@ -109,7 +159,9 @@ class Trainer(Seq2SeqTrainer):
             `torch.Tensor`: The tensor with training loss on this batch.
         """
         model.train()
-        
+
+        self._debug_lora_norms(model, "before")
+
         inputs = self._prepare_inputs(inputs)
 
         if is_sagemaker_mp_enabled():
@@ -126,7 +178,7 @@ class Trainer(Seq2SeqTrainer):
             # deepspeed handles loss scaling by gradient_accumulation_steps in its `backward`
             loss = loss / self.args.gradient_accumulation_steps
         
-        if self.do_grad_scaling:
+        if getattr(self, 'do_grad_scaling', False):
             self.scaler.scale(loss).backward()
         elif self.use_apex:
             with amp.scale_loss(loss, self.optimizer) as scaled_loss:
@@ -136,7 +188,9 @@ class Trainer(Seq2SeqTrainer):
             self.accelerator.backward(loss)
         else:
             loss.backward()
-        
+
+        self._debug_lora_norms(model, "after_backward")
+
         if self.state.global_step > self.args.replay_after_n_epoch*self.args.step_per_epoch and self.args.data_replay_freq != -1 and self.state.global_step % self.args.data_replay_freq == 0:
             for item in self.replay_iterator_dict.keys():
                 generator_mem1 = self.replay_iterator_dict[item]
@@ -159,7 +213,7 @@ class Trainer(Seq2SeqTrainer):
                 if self.args.n_gpu > 1:
                     kl_loss = kl_loss.mean()  # mean() to average on multi-gpu parallel trainin
         
-                if self.do_grad_scaling:
+                if getattr(self, 'do_grad_scaling', False):
                     self.scaler.scale(kl_loss).backward()
                 elif self.use_apex:
                     with amp.scale_loss(kl_loss, self.optimizer) as scaled_loss:
@@ -244,12 +298,13 @@ class Trainer(Seq2SeqTrainer):
 
             optimizer_cls, optimizer_kwargs = Trainer.get_optimizer_cls_and_kwargs(self.args)
 
-            if self.sharded_ddp == ShardedDDPOption.SIMPLE:
-                self.optimizer = OSS(
-                    params=optimizer_grouped_parameters,
-                    optim=optimizer_cls,
-                    **optimizer_kwargs,
-                )
+            if version.parse(transformers.__version__) <= version.parse("4.30.2"):
+                if getattr(self, 'sharded_ddp', None) == ShardedDDPOption.SIMPLE:
+                    self.optimizer = OSS(
+                        params=optimizer_grouped_parameters,
+                        optim=optimizer_cls,
+                        **optimizer_kwargs,
+                    )
             else:
                 self.optimizer = optimizer_cls(optimizer_grouped_parameters, **optimizer_kwargs)
                 if optimizer_cls.__name__ == "Adam8bit":
@@ -358,11 +413,17 @@ class Trainer(Seq2SeqTrainer):
                 losses = self._nested_gather(loss.repeat(batch_size))
                 losses_host = losses if losses_host is None else torch.cat((losses_host, losses), dim=0)
             if labels is not None:
-                labels = self._pad_across_processes(labels)
+                if version.parse(transformers.__version__) <= version.parse("4.30.2"):
+                    labels = self._pad_across_processes(labels)
+                else:
+                    labels = self.accelerator.pad_across_processes(labels, dim=1, pad_index=-100)
                 labels = self._nested_gather(labels)
                 labels_host = labels if labels_host is None else nested_concat(labels_host, labels, padding_index=-100)
             if logits is not None:
-                logits = self._pad_across_processes(logits)
+                if version.parse(transformers.__version__) <= version.parse("4.30.2"):
+                    logits = self._pad_across_processes(logits)
+                else:
+                    logits = self.accelerator.pad_across_processes(logits, dim=1, pad_index=-100)
                 logits = self._nested_gather(logits)
                 if self.preprocess_logits_for_metrics is not None:
                     logits = self.preprocess_logits_for_metrics(logits, labels)
@@ -480,6 +541,9 @@ class Trainer(Seq2SeqTrainer):
 
         # XXX: adapt synced_gpus for fairscale as well
         # gen_kwargs = self._gen_kwargs
+        model_name = f"{getattr(self.model.config, '_name_or_path', '')} {getattr(self.model.config, 'model_type', '')}"
+        is_decoder_model = check_model(model_name, SUPPORTED_DECODER_MODELS)
+
         if hasattr(self.model, "encoder") and self.model.encoder.main_input_name != self.model.main_input_name:
             # T5 generation config
             gen_kwargs = {
@@ -490,19 +554,30 @@ class Trainer(Seq2SeqTrainer):
                 "eos_token_id": 1,
                 "pad_token_id": 0,
             }
-            gen_kwargs["synced_gpus"] = False
         else:
             if inputs.get("input_ids_wo_label", None) is not None:
-                # LLaMA-2 generation config
-                gen_kwargs = {
-                    "bos_token_id": 1,
-                    "max_new_tokens": 50,
-                    "num_beams": 1,
-                    "temperature": 1.0,
-                    "repetition_penalty": 1.0,
-                    "eos_token_id": 2,
-                    "pad_token_id": 1,
-                }
+                if check_model(self.model.config._name_or_path, ["qwen"]):
+                    # Qwen generation config
+                    gen_kwargs = {
+                        "bos_token_id": 151643,
+                        "max_new_tokens": 256,
+                        "num_beams": 1,
+                        "temperature": 1.0,
+                        "repetition_penalty": 1.0,
+                        "eos_token_id": 151643,
+                        "pad_token_id": 151643,
+                    }
+                else:
+                    # LLaMA-2 generation config
+                    gen_kwargs = {
+                        "bos_token_id": 1,
+                        "max_new_tokens": 256,
+                        "num_beams": 1,
+                        "temperature": 1.0,
+                        "repetition_penalty": 1.0,
+                        "eos_token_id": 2,
+                        "pad_token_id": 1,
+                    }
             else:
                 # T5 generation config
                 gen_kwargs = {
@@ -513,11 +588,10 @@ class Trainer(Seq2SeqTrainer):
                     "eos_token_id": 2,
                     "pad_token_id": 0,
                 }
-                
-            gen_kwargs["synced_gpus"] = False
 
+        generate_kwargs = {"synced_gpus": False}
         if "attention_mask" in inputs:
-            gen_kwargs["attention_mask"] = inputs.get("attention_mask", None)
+            generate_kwargs["attention_mask"] = inputs.get("attention_mask", None)
 
         generation_config = GenerationConfig(**gen_kwargs)
 
@@ -530,6 +604,7 @@ class Trainer(Seq2SeqTrainer):
             generated_tokens = self.model.generate(
                 input_ids=generation_inputs, 
                 generation_config=generation_config,
+                **generate_kwargs,
             )
         else:
             generation_inputs = inputs[self.model.main_input_name]
@@ -539,17 +614,19 @@ class Trainer(Seq2SeqTrainer):
                     input_ids=generation_inputs,
                     input_ids_wo_label=inputs["input_ids_wo_label"],
                     generation_config=generation_config,
+                    **generate_kwargs,
                 )
             
             else:
                 generated_tokens = self.model.generate(
                     input_ids=generation_inputs,
                     generation_config=generation_config,
+                    **generate_kwargs,
                 )
 
         bs, source_len = inputs['input_ids'].shape
         # in case the batch is shorter than max length, the output should be padded
-        if check_model(self.model.config._name_or_path, SUPPORTED_DECODER_MODELS):
+        if is_decoder_model:
             max_length = source_len + gen_kwargs["max_new_tokens"]
         else:
             max_length = gen_kwargs["max_new_tokens"]
