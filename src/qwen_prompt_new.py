@@ -387,20 +387,6 @@ class Qwen2Attention(nn.Module):
         topk_weights = topk_weights / topk_weights.sum(dim=1, keepdim=True)
         return topk_weights
 
-    def top_k_weights_keep_current(self, key_weights, top_k):
-        """During training, keep task-0/current LoRA routable so it can receive gradients."""
-        if key_weights.shape[1] == 1 or top_k <= 1:
-            current_weights = torch.zeros_like(key_weights)
-            current_weights[:, 0, :] = 1.0
-            return current_weights
-
-        top_k_previous = min(top_k - 1, key_weights.shape[1] - 1)
-        previous_values, previous_indices = torch.topk(key_weights[:, 1:, :].squeeze(-1), top_k_previous, dim=1)
-        topk_weights = torch.zeros_like(key_weights)
-        topk_weights[:, 0, :] = key_weights[:, 0, :]
-        topk_weights.scatter_(1, previous_indices.unsqueeze(-1) + 1, previous_values.unsqueeze(-1))
-        return topk_weights / topk_weights.sum(dim=1, keepdim=True).clamp(min=1e-10)
-
     def _left_pad_count(self, input_ids):
         pad_token_id = self.config.pad_token_id
         if pad_token_id is None:
@@ -506,7 +492,7 @@ class Qwen2Attention(nn.Module):
                 self.key_attention_weights_q = self.calculate_distances(key_q, [self.distribution_q] + self.previous_lora_distribution_q, self.distances_way, self.distances_temperature)
 
                 if self.training and self.train_key_weight_top > 0:
-                    self.key_attention_weights_q = self.top_k_weights_keep_current(self.key_attention_weights_q, self.train_key_weight_top)
+                    self.key_attention_weights_q = self.top_k_weights(self.key_attention_weights_q, self.train_key_weight_top)
                 elif (not self.training) and self.test_key_weight_top > 0:
                     self.key_attention_weights_q = self.top_k_weights(self.key_attention_weights_q, self.test_key_weight_top)
 
@@ -534,7 +520,7 @@ class Qwen2Attention(nn.Module):
                 self.key_attention_weights_v = self.calculate_distances(key_v, [self.distribution_v] + self.previous_lora_distribution_v, self.distances_way, self.distances_temperature)
 
                 if self.training and self.train_key_weight_top > 0:
-                    self.key_attention_weights_v = self.top_k_weights_keep_current(self.key_attention_weights_v, self.train_key_weight_top)
+                    self.key_attention_weights_v = self.top_k_weights(self.key_attention_weights_v, self.train_key_weight_top)
                 elif (not self.training) and self.test_key_weight_top > 0:
                     self.key_attention_weights_v = self.top_k_weights(self.key_attention_weights_v, self.test_key_weight_top)
 
