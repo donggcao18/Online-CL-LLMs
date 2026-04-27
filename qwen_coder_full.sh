@@ -63,7 +63,7 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --successor N \
    --bf16 \
    --deepspeed $DS_CONFIG \
---num_eval 200 
+   --num_eval 200 
 
 
 rm -rf logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/1-CONCODE/checkpoint*
