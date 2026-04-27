@@ -413,11 +413,17 @@ class Trainer(Seq2SeqTrainer):
                 losses = self._nested_gather(loss.repeat(batch_size))
                 losses_host = losses if losses_host is None else torch.cat((losses_host, losses), dim=0)
             if labels is not None:
-                labels = self.accelerator.pad_across_processes(labels, dim=1, pad_index=-100)
+                if version.parse(transformers.__version__) <= version.parse("4.30.2"):
+                    labels = self._pad_across_processes(labels)
+                else:
+                    labels = self.accelerator.pad_across_processes(labels, dim=1, pad_index=-100)
                 labels = self._nested_gather(labels)
                 labels_host = labels if labels_host is None else nested_concat(labels_host, labels, padding_index=-100)
             if logits is not None:
-                logits = self.accelerator.pad_across_processes(logits, dim=1, pad_index=-100)
+                if version.parse(transformers.__version__) <= version.parse("4.30.2"):
+                    logits = self._pad_across_processes(logits)
+                else:
+                    logits = self.accelerator.pad_across_processes(logits, dim=1, pad_index=-100)
                 logits = self._nested_gather(logits)
                 if self.preprocess_logits_for_metrics is not None:
                     logits = self.preprocess_logits_for_metrics(logits, labels)
