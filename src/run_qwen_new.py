@@ -284,6 +284,13 @@ class DataTrainingArguments:
                     "which is used during ``evaluate`` and ``predict``."
         },
     )
+    max_num_instances_per_task: int = field(
+        default=-1, metadata={"help": "The maximum number of instances we will consider for each training task."}
+    )
+    max_num_instances_per_eval_task: int = field(
+        default=-1,
+        metadata={"help": "The maximum number of instances we will consider for each validation/test task."}
+    )
     max_train_samples: Optional[int] = field(
         default=None,
         metadata={
@@ -428,8 +435,8 @@ def main():
         data_dir=data_args.data_dir,
         task_config_dir=data_args.task_config_dir,
         # cache_dir=data_cache_dir,  # for debug, change dataset size, otherwise open it
-        max_num_instances_per_task=None,
-        max_num_instances_per_eval_task=None,
+        max_num_instances_per_task=data_args.max_num_instances_per_task,
+        max_num_instances_per_eval_task=data_args.max_num_instances_per_eval_task,
         num_examples=data_args.num_examples,
     )
     raw_datasets.cleanup_cache_files()
@@ -723,7 +730,6 @@ def main():
             checkpoint = training_args.resume_from_checkpoint
         elif last_checkpoint is not None:
             checkpoint = last_checkpoint
-        
         train_result = trainer.train(resume_from_checkpoint=checkpoint)
 
         save_path = training_args.output_dir + "/saved_weights"
