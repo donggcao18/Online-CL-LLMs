@@ -96,7 +96,7 @@ class LoRALayer(nn.Module):
 
         self.out_features = out_features
 
-        self.lora_A = nn.Parameter(torch.zeros((r, in_features)))
+        self.lora_A = nn.Parameter(torch.empty((r, in_features)))
         self.lora_B = nn.Parameter(torch.zeros((out_features, r)))
 
         self.scaling = self.lora_alpha / self.r
@@ -387,6 +387,12 @@ class Qwen2Attention(nn.Module):
         topk_weights = topk_weights / topk_weights.sum(dim=1, keepdim=True)
         return topk_weights
 
+    def _left_pad_count(self, input_ids):
+        pad_token_id = self.config.pad_token_id
+        if pad_token_id is None:
+            return torch.zeros((), dtype=torch.long, device=input_ids.device)
+        return (input_ids == pad_token_id).long().sum()
+
     def top_p_weights(self, key_weights, top_p, norm=True):
         if not (0.0 < top_p <= 1.0):
             raise ValueError("top_p must be in the range (0.0, 1.0].")
@@ -420,8 +426,8 @@ class Qwen2Attention(nn.Module):
             with torch.no_grad():
                 for each_q, each_ids_w, each_ids in zip(all_gpu_hidden_states, all_gpu_input_ids_wo_label, all_gpu_input_ids):
                     each_q = self.q_proj(each_q.unsqueeze(0)).squeeze(0)
-                    start = (each_ids == 1).long().sum()
-                    end = len(each_ids_w) - (each_ids_w == 1).long().sum() + (each_ids == 1).long().sum()
+                    start = self._left_pad_count(each_ids)
+                    end = len(each_ids_w) - self._left_pad_count(each_ids_w) + start
                     each_q = each_q[start:end]
                     if each_q.shape[0] == 0:
                         continue
@@ -448,8 +454,8 @@ class Qwen2Attention(nn.Module):
             with torch.no_grad():
                 for each_v, each_ids_w, each_ids in zip(all_gpu_hidden_states, all_gpu_input_ids_wo_label, all_gpu_input_ids):
                     each_v = self.v_proj(each_v.unsqueeze(0)).squeeze(0)
-                    start = (each_ids == 1).long().sum()
-                    end = len(each_ids_w) - (each_ids_w == 1).long().sum() + (each_ids == 1).long().sum()
+                    start = self._left_pad_count(each_ids)
+                    end = len(each_ids_w) - self._left_pad_count(each_ids_w) + start
                     each_v = each_v[start:end]
                     if each_v.shape[0] == 0:
                         continue
@@ -475,7 +481,9 @@ class Qwen2Attention(nn.Module):
             with torch.no_grad():
                 key_q = None
                 for each_q, each_ids_w, each_ids in zip(self.q_proj(hidden_states), input_ids_wo_label, input_ids):
-                    each_q = each_q[(each_ids == 1).long().sum():len(each_ids_w) - (each_ids_w == 1).long().sum() + (each_ids == 1).long().sum()]
+                    start = self._left_pad_count(each_ids)
+                    end = len(each_ids_w) - self._left_pad_count(each_ids_w) + start
+                    each_q = each_q[start:end]
                     each_q = torch.mean(each_q, dim=0)
                     if key_q is None:
                         key_q = each_q.unsqueeze(0)
@@ -501,7 +509,9 @@ class Qwen2Attention(nn.Module):
             with torch.no_grad():
                 key_v = None
                 for each_v, each_ids_w, each_ids in zip(self.v_proj(hidden_states), input_ids_wo_label, input_ids):
-                    each_v = each_v[(each_ids == 1).long().sum():len(each_ids_w) - (each_ids_w == 1).long().sum() + (each_ids == 1).long().sum()]
+                    start = self._left_pad_count(each_ids)
+                    end = len(each_ids_w) - self._left_pad_count(each_ids_w) + start
+                    each_v = each_v[start:end]
                     each_v = torch.mean(each_v, dim=0)
                     if key_v is None:
                         key_v = each_v.unsqueeze(0)
@@ -1219,7 +1229,9 @@ class Qwen2PreTrainedModel(PreTrainedModel):
 
     def _init_weights(self, module):
         std = self.config.initializer_range
-        if isinstance(module, nn.Linear):
+        if isinstance(module, LoRALayer):
+            module.reset_parameters()
+        elif isinstance(module, nn.Linear):
             module.weight.data.normal_(mean=0.0, std=std)
             if module.bias is not None:
                 module.bias.data.zero_()
