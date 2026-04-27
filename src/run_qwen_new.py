@@ -48,7 +48,7 @@ from transformers.trainer_utils import get_last_checkpoint
 from cl_collator import DataCollator
 from cl_dataset import gen_cache_path, GaussianDistribution
 from qwen_prompt_new import Qwen2ForCausalLM
-from assets import task_config, lora_state_dict_A, lora_state_dict_B,lora_state_dict_distribution
+from assets import task_config, lora_state_dict_A, lora_state_dict_B, lora_state_dict_distribution
 
 from cl_trainer import Trainer, DenserEvalCallback, skip_instructions
 from compute_metrics import compute_metrics, compute_grouped_metrics

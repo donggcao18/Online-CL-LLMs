@@ -121,11 +121,22 @@ class Trainer(Seq2SeqTrainer):
                 continue
             seen.add(key)
             data_norm = param.detach().float().norm().item()
+            # NOTE: With DeepSpeed ZeRO-2 (reduce_scatter=true + contiguous_gradients=true),
+            # param.grad is zeroed/nulled after backward because DS moves grads to its
+            # internal partitioned flat buffer. grad_norm=0.0 here does NOT mean the
+            # gradient is truly zero — DS has already consumed it.
+            # Use data_norm_drift below to confirm parameters are actually being updated.
             if param.grad is None:
                 grad_norm = None
             else:
                 grad_norm = param.grad.detach().float().norm().item()
-            print(f"[DEBUG step={self.state.global_step}] {prefix} {name}: norm={data_norm:.8f}, grad_norm={grad_norm}")
+            prev_key = f"_prev_data_norm_{key.replace('.', '_')}"
+            prev_norm = getattr(self, prev_key, None)
+            drift = None if prev_norm is None else (data_norm - prev_norm)
+            if prefix == "before":
+                setattr(self, prev_key, data_norm)
+            print(f"[DEBUG step={self.state.global_step}] {prefix} {name}: "
+                  f"data_norm={data_norm:.8f}, grad_norm={grad_norm}, data_norm_drift={drift}")
             if len(seen) == len(tracked):
                 break
 
