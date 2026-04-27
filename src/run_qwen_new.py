@@ -284,13 +284,6 @@ class DataTrainingArguments:
                     "which is used during ``evaluate`` and ``predict``."
         },
     )
-    max_num_instances_per_task: int = field(
-        default=10000, metadata={"help": "The maximum number of instances we will consider for each training task."}
-    )
-    max_num_instances_per_eval_task: int = field(
-        default=200,
-        metadata={"help": "The maximum number of instances we will consider for each validation/test task."}
-    )
     max_train_samples: Optional[int] = field(
         default=None,
         metadata={
@@ -435,8 +428,8 @@ def main():
         data_dir=data_args.data_dir,
         task_config_dir=data_args.task_config_dir,
         # cache_dir=data_cache_dir,  # for debug, change dataset size, otherwise open it
-        max_num_instances_per_task=data_args.max_num_instances_per_task,
-        max_num_instances_per_eval_task=data_args.max_num_instances_per_eval_task,
+        max_num_instances_per_task=None,
+        max_num_instances_per_eval_task=None,
         num_examples=data_args.num_examples,
     )
     raw_datasets.cleanup_cache_files()
