@@ -50,7 +50,7 @@ from cl_dataset import gen_cache_path, GaussianDistribution
 from qwen_prompt_new import Qwen2ForCausalLM
 from assets import task_config, lora_state_dict_A, lora_state_dict_B, lora_state_dict_distribution
 
-from cl_trainer import Trainer, DenserEvalCallback, skip_instructions
+from cl_trainer import Trainer, DenserEvalCallback, skip_instructions, _log_lora_a_norms
 from compute_metrics import compute_metrics, compute_grouped_metrics
 
 # off wandb
@@ -498,7 +498,10 @@ def main():
         use_auth_token=True if model_args.use_auth_token else None,
         use_safetensors=True,
     ).to('cuda')
-    
+
+    # Checkpoint 1: immediately after from_pretrained — before any DS wrapping.
+    _log_lora_a_norms(model, "1_after_from_pretrained")
+
     model.resize_token_embeddings(len(tokenizer))
 
     if model.generation_config.pad_token_id is None:
@@ -717,7 +720,7 @@ def main():
         tokenizer=tokenizer,
         data_collator=data_collator,
         compute_metrics=compute_rouge_metrics,
-        callbacks=[DenserEvalCallback] if training_args.denser_evaluation else None
+        callbacks=[DenserEvalCallback()] if training_args.denser_evaluation else None
     )
 
     all_metrics = {"run_name": training_args.run_name}
@@ -729,6 +732,8 @@ def main():
             checkpoint = training_args.resume_from_checkpoint
         elif last_checkpoint is not None:
             checkpoint = last_checkpoint
+        # Checkpoint 2: immediately before trainer.train() — after all weight loading and requires_grad setup.
+        _log_lora_a_norms(model, "2_before_trainer_train")
         train_result = trainer.train(resume_from_checkpoint=checkpoint)
 
         save_path = training_args.output_dir + "/saved_weights"
