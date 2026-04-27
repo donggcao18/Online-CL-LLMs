@@ -46,7 +46,7 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --lr_scheduler_type constant \
    --warmup_steps 0 \
    --logging_strategy steps \
-   --logging_steps 100 \
+   --logging_steps 50 \
    --evaluation_strategy no \
    --save_strategy no \
    --lora_r 16 \
@@ -100,7 +100,7 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --lr_scheduler_type constant \
    --warmup_steps 0 \
    --logging_strategy steps \
-   --logging_steps 100 \
+   --logging_steps 50 \
    --evaluation_strategy no \
    --save_strategy no \
    --lora_r 16 \
@@ -153,7 +153,7 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --lr_scheduler_type constant \
    --warmup_steps 0 \
    --logging_strategy steps \
-   --logging_steps 100 \
+   --logging_steps 50 \
    --evaluation_strategy no \
    --save_strategy no \
    --lora_r 16 \
@@ -207,7 +207,7 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --lr_scheduler_type constant \
    --warmup_steps 0 \
    --logging_strategy steps \
-   --logging_steps 100 \
+   --logging_steps 50 \
    --evaluation_strategy no \
    --save_strategy no \
    --lora_r 16 \
@@ -261,7 +261,7 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --lr_scheduler_type constant \
    --warmup_steps 0 \
    --logging_strategy steps \
-   --logging_steps 100 \
+   --logging_steps 50 \
    --evaluation_strategy no \
    --save_strategy no \
    --lora_r 16 \
@@ -312,7 +312,7 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --lr_scheduler_type constant \
    --warmup_steps 0 \
    --logging_strategy steps \
-   --logging_steps 100 \
+   --logging_steps 50 \
    --evaluation_strategy no \
    --save_strategy no \
    --lora_r 16 \
@@ -363,7 +363,7 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --lr_scheduler_type constant \
    --warmup_steps 0 \
    --logging_strategy steps \
-   --logging_steps 100 \
+   --logging_steps 50 \
    --evaluation_strategy no \
    --save_strategy no \
    --lora_r 16 \
@@ -415,7 +415,7 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --lr_scheduler_type constant \
    --warmup_steps 0 \
    --logging_strategy steps \
-   --logging_steps 100 \
+   --logging_steps 50 \
    --evaluation_strategy no \
    --save_strategy no \
    --lora_r 16 \
