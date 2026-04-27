@@ -62,7 +62,8 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --test_key_weight_top_p -1.0 \
    --successor N \
    --bf16 \
-   --deepspeed $DS_CONFIG 
+   --deepspeed $DS_CONFIG \
+   --num_eval 200 
 
 
 rm -rf logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/1-CONCODE/checkpoint*
@@ -115,7 +116,8 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --train_key_weight_top_p -1.0 \
    --test_key_weight_top_p -1.0 \
    --successor N \
-   --deepspeed $DS_CONFIG 
+   --deepspeed $DS_CONFIG \
+   --num_eval 200 
 
 rm -rf logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/2-CodeTrans/checkpoint*
 
@@ -168,7 +170,8 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --train_key_weight_top_p -1.0 \
    --test_key_weight_top_p -1.0 \
    --successor N \
-   --deepspeed $DS_CONFIG 
+   --deepspeed $DS_CONFIG \
+   --num_eval 200 
 
 rm -rf logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/3-CodeSearchNet/checkpoint*
 
@@ -222,7 +225,8 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --train_key_weight_top_p -1.0 \
    --test_key_weight_top_p -1.0 \
    --successor N \
-   --deepspeed $DS_CONFIG 
+   --deepspeed $DS_CONFIG \
+   --num_eval 200 
 
 rm -rf logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/4-BFP/checkpoint*
 
@@ -276,7 +280,8 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --train_key_weight_top_p -1.0 \
    --test_key_weight_top_p -1.0 \
    --successor N \
-   --deepspeed $DS_CONFIG 
+   --deepspeed $DS_CONFIG \
+   --num_eval 200 
 
 rm -rf logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/5-KodCode/checkpoint*
 
@@ -327,7 +332,8 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --train_key_weight_top_p -1.0 \
    --test_key_weight_top_p -1.0 \
    --successor N \
-   --deepspeed $DS_CONFIG 
+   --deepspeed $DS_CONFIG \
+   --num_eval 200 
 
 rm -rf logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/6-RunBugRun/checkpoint*
 
@@ -378,7 +384,8 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --train_key_weight_top_p -1.0 \
    --test_key_weight_top_p -1.0 \
    --successor N \
-   --deepspeed $DS_CONFIG 
+   --deepspeed $DS_CONFIG \
+   --num_eval 200 
 
 rm -rf logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/7-TheVault_Csharp/checkpoint*
 
@@ -430,7 +437,8 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --train_key_weight_top_p -1.0 \
    --test_key_weight_top_p -1.0 \
    --successor N \
-   --deepspeed $DS_CONFIG 
+   --deepspeed $DS_CONFIG \
+   --num_eval 200 
 
 rm -rf logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/8-CoST/checkpoint*
 

@@ -251,8 +251,6 @@ class CLInstructions(datasets.GeneratorBasedBuilder):
         sample_template = {"Task": "CL", "Dataset": dataset_name, "Samples": [], "subset": subset}
 
         for idx, instance in enumerate(data['Instances']):
-            if max_num_instances is not None and idx >= max_num_instances:
-                break
             example = sample_template.copy()
             instruction = ""
             # add the input first.
@@ -312,8 +310,6 @@ class CLInstructions(datasets.GeneratorBasedBuilder):
         sample_template = {"Task": "CL", "Dataset": dataset_name, "Samples": [], "subset": subset}
 
         for idx, instance in enumerate(data['Instances']):
-            if max_num_instances is not None and idx >= max_num_instances:
-                break
             example = sample_template.copy()
             instruction = ""
             # add the input first.
