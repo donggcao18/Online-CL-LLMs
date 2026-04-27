@@ -285,10 +285,10 @@ class DataTrainingArguments:
         },
     )
     max_num_instances_per_task: int = field(
-        default=-1, metadata={"help": "The maximum number of instances we will consider for each training task."}
+        default=95000, metadata={"help": "The maximum number of instances we will consider for each training task."}
     )
     max_num_instances_per_eval_task: int = field(
-        default=-1,
+        default=200,
         metadata={"help": "The maximum number of instances we will consider for each validation/test task."}
     )
     max_train_samples: Optional[int] = field(
