@@ -21,34 +21,6 @@ from cl_collator import SUPPORTED_DECODER_MODELS, check_model
 from cl_dataset import ANSWER_PREFIX
 
 
-def _log_lora_a_norms(model, checkpoint_label: str):
-    """Log lora_A.norm() for the first trainable lora_q/lora_v in each layer.
-
-    Call at three checkpoints to isolate where DeepSpeed (or any other step)
-    zeros out lora_A:
-      1. Immediately after from_pretrained (in run_qwen_new.py)
-      2. Immediately before trainer.train()  (in run_qwen_new.py)
-      3. First line of training_step()       (in cl_trainer.py)
-    If norm is nonzero at 1 & 2 but zero at 3, DeepSpeed/wrapping is zeroing it.
-    """
-    is_rank0 = not torch.distributed.is_initialized() or torch.distributed.get_rank() == 0
-    if not is_rank0:
-        return
-    tracked = ("lora_q.lora_A", "lora_v.lora_A")
-    seen = set()
-    for name, param in model.named_parameters():
-        if "previous_lora_weights" in name:
-            continue
-        key = next((t for t in tracked if t in name), None)
-        if key is None or key in seen:
-            continue
-        seen.add(key)
-        norm = param.detach().float().norm().item()
-        print(f"[lora_A probe | {checkpoint_label}] {name}: norm={norm:.8f}")
-        if len(seen) == len(tracked):
-            break
-
-
 def skip_instructions(model, predictions_ids, tokenizer, ignore_idx=-100):
     predictions_ids = np.where(predictions_ids == ignore_idx, tokenizer.pad_token_id, predictions_ids)
 
@@ -187,11 +159,6 @@ class Trainer(Seq2SeqTrainer):
             `torch.Tensor`: The tensor with training loss on this batch.
         """
         model.train()
-
-        # Checkpoint 3: first line of training_step — model is already DeepSpeed-wrapped.
-        # Compare this norm against checkpoints 1 & 2 logged in run_qwen_new.py.
-        if self.state.global_step == 0:
-            _log_lora_a_norms(model, "3_training_step_step0")
 
         self._debug_lora_norms(model, "before")
 
