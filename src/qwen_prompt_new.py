@@ -96,7 +96,7 @@ class LoRALayer(nn.Module):
 
         self.out_features = out_features
 
-        self.lora_A = nn.Parameter(torch.zeros((r, in_features)))
+        self.lora_A = nn.Parameter(torch.empty((r, in_features)))
         self.lora_B = nn.Parameter(torch.zeros((out_features, r)))
 
         self.scaling = self.lora_alpha / self.r
@@ -1243,7 +1243,9 @@ class Qwen2PreTrainedModel(PreTrainedModel):
 
     def _init_weights(self, module):
         std = self.config.initializer_range
-        if isinstance(module, nn.Linear):
+        if isinstance(module, LoRALayer):
+            module.reset_parameters()
+        elif isinstance(module, nn.Linear):
             module.weight.data.normal_(mean=0.0, std=std)
             if module.bias is not None:
                 module.bias.data.zero_()
@@ -1525,6 +1527,12 @@ class Qwen2Model(Qwen2PreTrainedModel):
 class Qwen2ForCausalLM(Qwen2PreTrainedModel):
     _tied_weights_keys = ["lm_head.weight"]
 
+    @classmethod
+    def from_pretrained(cls, *args, **kwargs):
+        model = super().from_pretrained(*args, **kwargs)
+        model._reinitialize_zero_lora_A()
+        return model
+
     def __init__(self, config, prompt_config):
         super().__init__(config)
         self.model = Qwen2Model(config, prompt_config)
@@ -1533,6 +1541,31 @@ class Qwen2ForCausalLM(Qwen2PreTrainedModel):
 
         # Initialize weights and apply final processing
         self.post_init()
+
+    def _reinitialize_zero_lora_A(self):
+        reinitialized = []
+        for module_name, module in self.named_modules():
+            if "previous_lora_weights" in module_name:
+                continue
+            if not isinstance(module, LoRALayer):
+                continue
+            if module.lora_A.detach().float().norm().item() != 0.0:
+                continue
+
+            with torch.no_grad():
+                init_tensor = torch.empty(module.lora_A.shape, device=module.lora_A.device, dtype=torch.float32)
+                nn.init.kaiming_uniform_(init_tensor, a=math.sqrt(5))
+                module.lora_A.copy_(init_tensor.to(dtype=module.lora_A.dtype))
+                module.lora_B.zero_()
+            reinitialized.append(module_name)
+
+        if reinitialized:
+            preview = ", ".join(reinitialized[:4])
+            suffix = "" if len(reinitialized) <= 4 else f", ... (+{len(reinitialized) - 4} more)"
+            print(
+                "[Qwen LoRA init] Reinitialized zero current lora_A tensors "
+                f"for {len(reinitialized)} modules: {preview}{suffix}"
+            )
 
     def get_input_embeddings(self):
         return self.model.embed_tokens
