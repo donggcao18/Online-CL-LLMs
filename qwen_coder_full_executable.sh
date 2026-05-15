@@ -65,7 +65,7 @@ deepspeed --num_gpus=4 src/run_qwen_new.py \
    --test_key_weight_top_p -1.0 \
    --successor N \
    --deepspeed $DS_CONFIG \
-   --max_eval_samples 3 
+   --max_eval_samples 3
    
 
 
@@ -120,8 +120,7 @@ deepspeed --num_gpus=4 src/run_qwen_new.py \
    --test_key_weight_top_p -1.0 \
    --successor N \
    --deepspeed $DS_CONFIG \
-   --max_eval_samples 2 \
-   --max_predict_samples 3 
+   --max_eval_samples 3
    
 
 rm -rf logs_and_outputs/test_qwen_executable_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/2-cpp/checkpoint*
@@ -176,8 +175,7 @@ deepspeed --num_gpus=4 src/run_qwen_new.py \
    --test_key_weight_top_p -1.0 \
    --successor N \
    --deepspeed $DS_CONFIG \
-   --max_eval_samples 2 \
-   --max_predict_samples 3 
+   --max_eval_samples 3
    
 
 rm -rf logs_and_outputs/test_qwen_executable_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/3-swift/checkpoint*
@@ -232,8 +230,7 @@ deepspeed --num_gpus=4 src/run_qwen_new.py \
    --test_key_weight_top_p -1.0 \
    --successor N \
    --deepspeed $DS_CONFIG \
-   --max_eval_samples 2 \
-   --max_predict_samples 3 
+   --max_eval_samples 3
    
 
 rm -rf logs_and_outputs/test_qwen_executable_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/4-rust/checkpoint*
