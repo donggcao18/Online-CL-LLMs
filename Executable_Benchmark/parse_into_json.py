@@ -21,8 +21,7 @@ def _load_split(repo_id: str, split: str) -> Dataset:
     repo_id,
     split=split,
     revision="e85e1e6c871ee584381c4215af06b6b072cd8b02",
-    token=_hf_token(),
-    download_mode="reuse_cache_if_exists"
+    token=_hf_token()
     )
     return ds
 

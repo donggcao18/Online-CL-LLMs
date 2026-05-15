@@ -359,7 +359,7 @@ class CLInstructions(datasets.GeneratorBasedBuilder):
         logger.info(f"Generating tasks from = {path}")
 
         for task in task_config:
-            if task == 'SuperNI' or task == "CodeTask":
+            if task == 'SuperNI' or task == "CodeTask" or task == "Executable":
                 load_func = self.load_SuperNI_dataset
             elif task == "Long_Sequence":
                 load_func = self.load_LongSeq_dataset

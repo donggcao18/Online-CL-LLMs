@@ -569,6 +569,7 @@ class Trainer(Seq2SeqTrainer):
                             "repetition_penalty": 1.0,
                             "eos_token_id": 151643,
                             "pad_token_id": 151643,
+                            "do_sample": True,
                         }
                     else:
                         gen_kwargs = {
