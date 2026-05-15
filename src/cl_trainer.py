@@ -648,6 +648,10 @@ class Trainer(Seq2SeqTrainer):
         if generated_tokens.shape[-1] < max_length:
             generated_tokens = self._pad_tensors_to_max_len(generated_tokens, max_length)
 
+        if gen_kwargs.get("num_return_sequences", 1) > 1:
+            # Reshape from [BS*5, Len] to [BS, 5, Len]
+            generated_tokens = generated_tokens.view(bs, gen_kwargs["num_return_sequences"], -1)
+
         with torch.no_grad():
             if has_labels:
                 with self.autocast_smart_context_manager():

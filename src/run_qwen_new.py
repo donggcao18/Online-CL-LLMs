@@ -688,32 +688,61 @@ def main():
 
     # Metric
     def compute_rouge_metrics(dataset, preds, save_prefix=None):
-        decoded_preds = skip_instructions(model, preds, tokenizer)
+        # preds shape: [NumSamples, 5, SeqLen]
+        num_sequences = preds.shape[1] if len(preds.shape) == 3 else 1
+        
+        # 1. Flatten, decode, and group
+        if num_sequences > 1:
+            # Flatten to [Samples * 5, SeqLen] for the tokenizer
+            preds_flattened = preds.reshape(-1, preds.shape[-1])
+            decoded_preds_flat = skip_instructions(model, preds_flattened, tokenizer)
+            # Group back into [[p1..p5], [p1..p5], ...]
+            decoded_preds = [decoded_preds_flat[i:i + num_sequences] for i in range(0, len(decoded_preds_flat), num_sequences)]
+            
+            # Select the first prediction for the actual metric calculation
+            metric_preds = [p[0] for p in decoded_preds]
+        else:
+            decoded_preds = skip_instructions(model, preds, tokenizer)
+            metric_preds = decoded_preds
+            
         if dataset["Dataset"] in EXECUTABLE_TASK_LIST:
             result = {}
         else:
             references = [e["Instance"]["label"] for e in dataset]
-            result = compute_metrics(predictions=decoded_preds, references=references)
-            result_per_task = compute_grouped_metrics(predictions=decoded_preds, references=references,
+            # Use metric_preds (flat list of strings) here
+            result = compute_metrics(predictions=metric_preds, references=references)
+            result_per_task = compute_grouped_metrics(predictions=metric_preds, references=references,
                                                     groups=dataset["Task"])
             result.update(result_per_task)
             categories = dataset["Dataset"]
-            result_per_category = compute_grouped_metrics(predictions=decoded_preds, references=references,
+            result_per_category = compute_grouped_metrics(predictions=metric_preds, references=references,
                                                         groups=categories)
             result.update(result_per_category)
-        prediction_lens = [np.count_nonzero(pred != tokenizer.pad_token_id) for pred in preds]
+
+        # 2. Fix prediction length calculation for 3D tensors
+        # We calculate the average length of the first (primary) prediction
+        if num_sequences > 1:
+            # Take only the primary sequences: [NumSamples, SeqLen]
+            primary_preds = preds[:, 0, :] 
+            prediction_lens = [np.count_nonzero(p != tokenizer.pad_token_id) for p in primary_preds]
+        else:
+            prediction_lens = [np.count_nonzero(p != tokenizer.pad_token_id) for p in preds]
+
         result["gen_len"] = np.mean(prediction_lens)
         result = {k: round(v, 4) for k, v in result.items()}
+
+        # 3. Save to JSONL (using decoded_preds which contains all 5)
         if save_prefix is not None:
             with open(os.path.join(training_args.output_dir, f"{save_prefix}_eval_predictions.jsonl"), "w") as fout:
-                for example, pred in zip(dataset, decoded_preds):
+                for example, pred_list in zip(dataset, decoded_preds):
                     fout.write(json.dumps({
                         "Task": example["Task"],
                         "Dataset": example["Dataset"],
                         "Instance": example["Instance"],
-                        "Prediction": pred
+                        "Predictions": pred_list # This stores the full list of 5
                     }) + "\n")
         return result
+
     print(f"-----Gradient checkpointing: {training_args.gradient_checkpointing} -----")
     if training_args.gradient_checkpointing:
         model.gradient_checkpointing_enable()
