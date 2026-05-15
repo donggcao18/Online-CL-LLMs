@@ -73,7 +73,7 @@ class DenserEvalCallback(TrainerCallback):
 
 class Trainer(Seq2SeqTrainer):
 
-    def __init__(self, model, args, train_dataset, cur_task_id, task_order, data_collator_replay=None, replay_dataset_dict=None, replay_label_dict=None, eval_dataset=None, tokenizer=None, data_collator=None, compute_metrics=None, callbacks=None):
+    def __init__(self, model, args, train_dataset, cur_task_id, task_order, data_collator_replay=None, replay_dataset_dict=None, replay_label_dict=None, eval_dataset=None, tokenizer=None, data_collator=None, compute_metrics=None, callbacks=None, data_dir="Executable_Benchmark"):
         super().__init__(model=model, args=args, train_dataset=train_dataset, eval_dataset=eval_dataset, tokenizer=tokenizer, data_collator=data_collator, compute_metrics=compute_metrics, callbacks=callbacks)
 
         self.data_collator_replay = data_collator_replay
@@ -81,6 +81,7 @@ class Trainer(Seq2SeqTrainer):
         self.replay_label_dict = replay_label_dict
         self.task_order = task_order
         self.cur_task_id = cur_task_id
+        self.data_dir = data_dir
 
         if self.args.data_replay_freq != -1:
             seed = self.args.data_seed if self.args.data_seed is not None else self.args.seed
@@ -558,15 +559,27 @@ class Trainer(Seq2SeqTrainer):
             if inputs.get("input_ids_wo_label", None) is not None:
                 if check_model(self.model.config._name_or_path, ["qwen"]):
                     # Qwen generation config
-                    gen_kwargs = {
-                        "bos_token_id": 151643,
-                        "max_new_tokens": 256,
-                        "num_beams": 1,
-                        "temperature": 1.0,
-                        "repetition_penalty": 1.0,
-                        "eos_token_id": 151643,
-                        "pad_token_id": 151643,
-                    }
+                    if self.data_dir == "Executable_Benchmark":
+                        gen_kwargs = {
+                            "bos_token_id": 151643,
+                            "max_new_tokens": 2048,
+                            "temperature": 0.2,
+                            "top_p": 0.95,
+                            "num_return_sequences": 5,
+                            "repetition_penalty": 1.0,
+                            "eos_token_id": 151643,
+                            "pad_token_id": 151643,
+                        }
+                    else:
+                        gen_kwargs = {
+                            "bos_token_id": 151643,
+                            "max_new_tokens": 256,
+                            "num_beams": 1,
+                            "temperature": 1.0,
+                            "repetition_penalty": 1.0,
+                            "eos_token_id": 151643,
+                            "pad_token_id": 151643,
+                        }
                 else:
                     # LLaMA-2 generation config
                     gen_kwargs = {

@@ -63,6 +63,18 @@ CURRENT_DIR = os.path.dirname(__file__)
 local_data_path = "/home/work/nltk_data"
 nltk.data.path.append(local_data_path)
 
+EXECUTABLE_TASK_LIST = [
+    'python',
+    'cpp',
+    'swift',
+    'rust',
+    'csharp',
+    'java',
+    'php',
+    'typescript',
+    'shell',
+]
+
 @dataclass
 class ModelArguments:
     """
@@ -677,15 +689,18 @@ def main():
     # Metric
     def compute_rouge_metrics(dataset, preds, save_prefix=None):
         decoded_preds = skip_instructions(model, preds, tokenizer)
-        references = [e["Instance"]["label"] for e in dataset]
-        result = compute_metrics(predictions=decoded_preds, references=references)
-        result_per_task = compute_grouped_metrics(predictions=decoded_preds, references=references,
-                                                  groups=dataset["Task"])
-        result.update(result_per_task)
-        categories = dataset["Dataset"]
-        result_per_category = compute_grouped_metrics(predictions=decoded_preds, references=references,
-                                                      groups=categories)
-        result.update(result_per_category)
+        if dataset["Dataset"] in EXECUTABLE_TASK_LIST:
+            result = {}
+        else:
+            references = [e["Instance"]["label"] for e in dataset]
+            result = compute_metrics(predictions=decoded_preds, references=references)
+            result_per_task = compute_grouped_metrics(predictions=decoded_preds, references=references,
+                                                    groups=dataset["Task"])
+            result.update(result_per_task)
+            categories = dataset["Dataset"]
+            result_per_category = compute_grouped_metrics(predictions=decoded_preds, references=references,
+                                                        groups=categories)
+            result.update(result_per_category)
         prediction_lens = [np.count_nonzero(pred != tokenizer.pad_token_id) for pred in preds]
         result["gen_len"] = np.mean(prediction_lens)
         result = {k: round(v, 4) for k, v in result.items()}
@@ -718,7 +733,8 @@ def main():
         tokenizer=tokenizer,
         data_collator=data_collator,
         compute_metrics=compute_rouge_metrics,
-        callbacks=[DenserEvalCallback()] if training_args.denser_evaluation else None
+        callbacks=[DenserEvalCallback()] if training_args.denser_evaluation else None,
+        data_dir=data_args.data_dir,
     )
 
     all_metrics = {"run_name": training_args.run_name}
