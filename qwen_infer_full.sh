@@ -24,7 +24,7 @@ DS_CONFIG="./configs/ds_configs/stage2.config"
 #    --model_name_or_path Qwen/Qwen2.5-Coder-1.5B \
 #    --data_dir CODETASK_Benchmark \
 #    --task_order CONCODE,CodeTrans,CodeSearchNet,BFP,KodCode,RunBugRun,TheVault_Csharp,CoST \
-#    --task_config_dir configs/CodeTask/configs/CodeTask/RunBugRun/CONCODE \
+#    --task_config_dir configs/CodeTask/configs/CodeTask/CONCODE \
 #    --output_dir logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/1-CONCODE \
 #    --per_device_train_batch_size 16 \
 #    --per_device_eval_batch_size 32 \
@@ -76,7 +76,7 @@ DS_CONFIG="./configs/ds_configs/stage2.config"
 #    --data_dir CODETASK_Benchmark \
 #    --task_order CONCODE,CodeTrans,CodeSearchNet,BFP,KodCode,RunBugRun,TheVault_Csharp,CoST \
 #    --gen_data_dir generated_data/lora_gen_superni_llama \
-#    --task_config_dir configs/CodeTask/configs/CodeTask/RunBugRun/CodeTrans \
+#    --task_config_dir configs/CodeTask/configs/CodeTask/CodeTrans \
 #    --output_dir logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/2-CodeTrans \
 #    --per_device_train_batch_size 16 \
 #    --per_device_eval_batch_size 32 \
@@ -128,7 +128,7 @@ DS_CONFIG="./configs/ds_configs/stage2.config"
 #    --data_dir CODETASK_Benchmark \
 #    --task_order CONCODE,CodeTrans,CodeSearchNet,BFP,KodCode,RunBugRun,TheVault_Csharp,CoST \
 #    --gen_data_dir generated_data/lora_gen_superni_llama \
-#    --task_config_dir configs/CodeTask/configs/CodeTask/RunBugRun/CodeSearchNet \
+#    --task_config_dir configs/CodeTask/configs/CodeTask/CodeSearchNet \
 #    --output_dir logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/3-CodeSearchNet \
 #    --per_device_train_batch_size 16 \
 #    --per_device_eval_batch_size 32 \
@@ -181,7 +181,7 @@ deepspeed --num_gpus=1 src/run_qwen_new.py \
    --data_dir CODETASK_Benchmark \
    --task_order CONCODE,CodeTrans,CodeSearchNet,BFP,KodCode,RunBugRun,TheVault_Csharp,CoST \
    --gen_data_dir generated_data/lora_gen_superni_llama \
-   --task_config_dir configs/CodeTask/configs/CodeTask/RunBugRun/KodCode \
+   --task_config_dir configs/CodeTask/configs/CodeTask/KodCode \
    --output_dir logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/5-KodCode \
    --per_device_train_batch_size 8 \
    --per_device_eval_batch_size 32 \
@@ -231,7 +231,7 @@ deepspeed --num_gpus=1 src/run_qwen_new.py \
    --data_dir CODETASK_Benchmark \
    --task_order CONCODE,CodeTrans,CodeSearchNet,BFP,KodCode,RunBugRun,TheVault_Csharp,CoST \
    --gen_data_dir generated_data/lora_gen_superni_llama \
-   --task_config_dir configs/CodeTask/configs/CodeTask/RunBugRun/RunBugRun \
+   --task_config_dir configs/CodeTask/configs/CodeTask/RunBugRun \
    --output_dir logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/6-RunBugRun \
    --per_device_train_batch_size 16 \
    --per_device_eval_batch_size 32 \
@@ -281,7 +281,7 @@ deepspeed --num_gpus=1 src/run_qwen_new.py \
    --data_dir CODETASK_Benchmark \
    --task_order CONCODE,CodeTrans,CodeSearchNet,BFP,KodCode,RunBugRun,TheVault_Csharp,CoST \
    --gen_data_dir generated_data/lora_gen_superni_llama \
-   --task_config_dir configs/CodeTask/configs/CodeTask/RunBugRun/TheVault_Csharp \
+   --task_config_dir configs/CodeTask/configs/CodeTask/TheVault_Csharp \
    --output_dir logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/7-TheVault_Csharp \
    --per_device_train_batch_size 16 \
    --per_device_eval_batch_size 32 \
@@ -331,7 +331,7 @@ deepspeed --num_gpus=1 src/run_qwen_new.py \
    --data_dir CODETASK_Benchmark \
    --task_order CONCODE,CodeTrans,CodeSearchNet,BFP,KodCode,RunBugRun,TheVault_Csharp,CoST \
    --gen_data_dir generated_data/lora_gen_superni_llama \
-   --task_config_dir configs/CodeTask/configs/CodeTask/RunBugRun/CoST \
+   --task_config_dir configs/CodeTask/configs/CodeTask/CoST \
    --output_dir logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/8-CoST \
    --per_device_train_batch_size 16 \
    --per_device_eval_batch_size 32 \
