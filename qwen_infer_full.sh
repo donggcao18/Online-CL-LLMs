@@ -13,7 +13,7 @@ fuser -k /dev/nvidia*
 
 export CUDA_DEVICE_ORDER="PCI_BUS_ID"
 export TORCH_DISTRIBUTED_DEBUG=DETAIL
-export CUDA_VISIBLE_DEVICES=0,1
+export CUDA_VISIBLE_DEVICES=0
 port=$(shuf -i25000-30000 -n1)
 DS_CONFIG="./configs/ds_configs/stage2.config"
 
@@ -27,7 +27,7 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --task_config_dir configs/CodeTask/CONCODE \
    --output_dir logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/1-CONCODE \
    --per_device_train_batch_size 16 \
-   --per_device_eval_batch_size 8 \
+   --per_device_eval_batch_size 16 \
    --gradient_accumulation_steps 1 \
    --learning_rate 1e-04 \
    --attn_lr 0.0 \
@@ -184,7 +184,7 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --task_config_dir configs/CodeTask/KodCode \
    --output_dir logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/5-KodCode \
    --per_device_train_batch_size 8 \
-   --per_device_eval_batch_size 8 \
+   --per_device_eval_batch_size 16 \
    --gradient_accumulation_steps 2 \
    --learning_rate 1e-04 \
    --attn_lr 0.0 \
