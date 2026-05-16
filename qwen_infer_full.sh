@@ -18,7 +18,7 @@ port=$(shuf -i25000-30000 -n1)
 DS_CONFIG="./configs/ds_configs/stage2.config"
 
 
-deepspeed --num_gpus=2 src/run_qwen_new.py \
+deepspeed --num_gpus=1 src/run_qwen_new.py \
    --do_predict\
    --predict_with_generate \
    --model_name_or_path Qwen/Qwen2.5-Coder-1.5B \
@@ -67,7 +67,7 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
 rm -rf logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/1-CONCODE/checkpoint*
 
 
-deepspeed --num_gpus=2 src/run_qwen_new.py \
+deepspeed --num_gpus=1 src/run_qwen_new.py \
    --do_predict\
    --predict_with_generate \
    --model_name_or_path Qwen/Qwen2.5-Coder-1.5B \
@@ -119,7 +119,7 @@ rm -rf logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1
 
 
 
-deepspeed --num_gpus=2 src/run_qwen_new.py \
+deepspeed --num_gpus=1 src/run_qwen_new.py \
    --do_predict\
    --predict_with_generate \
    --model_name_or_path Qwen/Qwen2.5-Coder-1.5B \
@@ -172,7 +172,7 @@ rm -rf logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1
 
 
 
-deepspeed --num_gpus=2 src/run_qwen_new.py \
+deepspeed --num_gpus=1 src/run_qwen_new.py \
    --do_predict\
    --predict_with_generate \
    --model_name_or_path Qwen/Qwen2.5-Coder-1.5B \
@@ -222,7 +222,7 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
 
 rm -rf logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/5-KodCode/checkpoint*
 
-deepspeed --num_gpus=2 src/run_qwen_new.py \
+deepspeed --num_gpus=1 src/run_qwen_new.py \
    --do_predict\
    --predict_with_generate \
    --model_name_or_path Qwen/Qwen2.5-Coder-1.5B \
@@ -272,7 +272,7 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
 
 rm -rf logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/6-RunBugRun/checkpoint*
 
-deepspeed --num_gpus=2 src/run_qwen_new.py \
+deepspeed --num_gpus=1 src/run_qwen_new.py \
    --do_predict\
    --predict_with_generate \
    --model_name_or_path Qwen/Qwen2.5-Coder-1.5B \
