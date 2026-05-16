@@ -19,11 +19,10 @@ DS_CONFIG="./configs/ds_configs/stage2.config"
 
 
 deepspeed --num_gpus=2 src/run_qwen_new.py \
-   --do_train \
-   --do_eval \
+   --do_predict\
    --predict_with_generate \
    --model_name_or_path Qwen/Qwen2.5-Coder-1.5B \
-   --data_dir CODETASK_Benchmark \
+   --data_dir CODETASK_Benchmark/CodeTask \
    --task_order CONCODE,CodeTrans,CodeSearchNet,BFP,KodCode,RunBugRun,TheVault_Csharp,CoST \
    --task_config_dir configs/CodeTask/CONCODE \
    --output_dir logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/1-CONCODE \
@@ -62,21 +61,19 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --test_key_weight_top_p -1.0 \
    --successor N \
    --bf16 \
-   --deepspeed $DS_CONFIG \
-   --num_eval 200 
+   --deepspeed $DS_CONFIG 
 
 
 rm -rf logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/1-CONCODE/checkpoint*
 
 
 deepspeed --num_gpus=2 src/run_qwen_new.py \
-   --do_train \
-   --do_eval \
+   --do_predict\
    --predict_with_generate \
    --model_name_or_path Qwen/Qwen2.5-Coder-1.5B \
    --previous_lora_path logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/1-CONCODE/saved_weights \
    --previous_lora_distribution_path logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/1-CONCODE/saved_weights \
-   --data_dir CODETASK_Benchmark \
+   --data_dir CODETASK_Benchmark/CodeTask \
    --task_order CONCODE,CodeTrans,CodeSearchNet,BFP,KodCode,RunBugRun,TheVault_Csharp,CoST \
    --gen_data_dir generated_data/lora_gen_superni_llama \
    --task_config_dir configs/CodeTask/CodeTrans \
@@ -116,21 +113,19 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --train_key_weight_top_p -1.0 \
    --test_key_weight_top_p -1.0 \
    --successor N \
-   --deepspeed $DS_CONFIG \
-   --num_eval 200 
+   --deepspeed $DS_CONFIG 
 
 rm -rf logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/2-CodeTrans/checkpoint*
 
 
 
 deepspeed --num_gpus=2 src/run_qwen_new.py \
-   --do_train \
-   --do_eval \
+   --do_predict\
    --predict_with_generate \
    --model_name_or_path Qwen/Qwen2.5-Coder-1.5B \
    --previous_lora_path logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/1-CONCODE/saved_weights,logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/2-CodeTrans/saved_weights \
    --previous_lora_distribution_path logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/1-CONCODE/saved_weights,logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/2-CodeTrans/saved_weights \
-   --data_dir CODETASK_Benchmark \
+   --data_dir CODETASK_Benchmark/CodeTask \
    --task_order CONCODE,CodeTrans,CodeSearchNet,BFP,KodCode,RunBugRun,TheVault_Csharp,CoST \
    --gen_data_dir generated_data/lora_gen_superni_llama \
    --task_config_dir configs/CodeTask/CodeSearchNet \
@@ -170,8 +165,7 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --train_key_weight_top_p -1.0 \
    --test_key_weight_top_p -1.0 \
    --successor N \
-   --deepspeed $DS_CONFIG \
-   --num_eval 200 
+   --deepspeed $DS_CONFIG 
 
 rm -rf logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/3-CodeSearchNet/checkpoint*
 
@@ -179,13 +173,12 @@ rm -rf logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1
 
 
 deepspeed --num_gpus=2 src/run_qwen_new.py \
-   --do_train \
-   --do_eval \
+   --do_predict\
    --predict_with_generate \
    --model_name_or_path Qwen/Qwen2.5-Coder-1.5B \
    --previous_lora_path logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/1-CONCODE/saved_weights,logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/2-CodeTrans/saved_weights,logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/3-CodeSearchNet/saved_weights,logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/4-BFP/saved_weights \
    --previous_lora_distribution_path logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/1-CONCODE/saved_weights,logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/2-CodeTrans/saved_weights,logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/3-CodeSearchNet/saved_weights,logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/4-BFP/saved_weights \
-   --data_dir CODETASK_Benchmark \
+   --data_dir CODETASK_Benchmark/CodeTask \
    --task_order CONCODE,CodeTrans,CodeSearchNet,BFP,KodCode,RunBugRun,TheVault_Csharp,CoST \
    --gen_data_dir generated_data/lora_gen_superni_llama \
    --task_config_dir configs/CodeTask/KodCode \
@@ -225,19 +218,17 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --train_key_weight_top_p -1.0 \
    --test_key_weight_top_p -1.0 \
    --successor N \
-   --deepspeed $DS_CONFIG \
-   --num_eval 200 
+   --deepspeed $DS_CONFIG 
 
 rm -rf logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/5-KodCode/checkpoint*
 
 deepspeed --num_gpus=2 src/run_qwen_new.py \
-   --do_train \
-   --do_eval \
+   --do_predict\
    --predict_with_generate \
    --model_name_or_path Qwen/Qwen2.5-Coder-1.5B \
    --previous_lora_path logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/1-CONCODE/saved_weights,logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/2-CodeTrans/saved_weights,logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/3-CodeSearchNet/saved_weights,logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/4-BFP/saved_weights,logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/5-KodCode/saved_weights \
    --previous_lora_distribution_path logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/1-CONCODE/saved_weights,logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/2-CodeTrans/saved_weights,logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/3-CodeSearchNet/saved_weights,logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/4-BFP/saved_weights,logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/5-KodCode/saved_weights \
-   --data_dir CODETASK_Benchmark \
+   --data_dir CODETASK_Benchmark/CodeTask \
    --task_order CONCODE,CodeTrans,CodeSearchNet,BFP,KodCode,RunBugRun,TheVault_Csharp,CoST \
    --gen_data_dir generated_data/lora_gen_superni_llama \
    --task_config_dir configs/CodeTask/RunBugRun \
@@ -277,19 +268,17 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --train_key_weight_top_p -1.0 \
    --test_key_weight_top_p -1.0 \
    --successor N \
-   --deepspeed $DS_CONFIG \
-   --num_eval 200 
+   --deepspeed $DS_CONFIG 
 
 rm -rf logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/6-RunBugRun/checkpoint*
 
 deepspeed --num_gpus=2 src/run_qwen_new.py \
-   --do_train \
-   --do_eval \
+   --do_predict\
    --predict_with_generate \
    --model_name_or_path Qwen/Qwen2.5-Coder-1.5B \
    --previous_lora_path logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/1-CONCODE/saved_weights,logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/2-CodeTrans/saved_weights,logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/3-CodeSearchNet/saved_weights,logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/4-BFP/saved_weights,logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/5-KodCode/saved_weights,logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/6-RunBugRun/saved_weights \
    --previous_lora_distribution_path logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/1-CONCODE/saved_weights,logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/2-CodeTrans/saved_weights,logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/3-CodeSearchNet/saved_weights,logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/4-BFP/saved_weights,logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/5-KodCode/saved_weights,logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/6-RunBugRun/saved_weights \
-   --data_dir CODETASK_Benchmark \
+   --data_dir CODETASK_Benchmark/CodeTask \
    --task_order CONCODE,CodeTrans,CodeSearchNet,BFP,KodCode,RunBugRun,TheVault_Csharp,CoST \
    --gen_data_dir generated_data/lora_gen_superni_llama \
    --task_config_dir configs/CodeTask/TheVault_Csharp \
@@ -329,7 +318,6 @@ deepspeed --num_gpus=2 src/run_qwen_new.py \
    --train_key_weight_top_p -1.0 \
    --test_key_weight_top_p -1.0 \
    --successor N \
-   --deepspeed $DS_CONFIG \
-   --num_eval 200 
+   --deepspeed $DS_CONFIG 
 
 rm -rf logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/7-TheVault_Csharp/checkpoint*
