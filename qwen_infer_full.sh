@@ -27,7 +27,7 @@ deepspeed --num_gpus=1 src/run_qwen_new.py \
    --task_config_dir configs/CodeTask/CONCODE \
    --output_dir logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/1-CONCODE \
    --per_device_train_batch_size 16 \
-   --per_device_eval_batch_size 16 \
+   --per_device_eval_batch_size 32 \
    --gradient_accumulation_steps 1 \
    --learning_rate 1e-04 \
    --attn_lr 0.0 \
@@ -79,7 +79,7 @@ deepspeed --num_gpus=1 src/run_qwen_new.py \
    --task_config_dir configs/CodeTask/CodeTrans \
    --output_dir logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/2-CodeTrans \
    --per_device_train_batch_size 16 \
-   --per_device_eval_batch_size 16 \
+   --per_device_eval_batch_size 32 \
    --gradient_accumulation_steps 1 \
    --learning_rate 1e-04 \
    --attn_lr 0.0 \
@@ -131,7 +131,7 @@ deepspeed --num_gpus=1 src/run_qwen_new.py \
    --task_config_dir configs/CodeTask/CodeSearchNet \
    --output_dir logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/3-CodeSearchNet \
    --per_device_train_batch_size 16 \
-   --per_device_eval_batch_size 16 \
+   --per_device_eval_batch_size 32 \
    --gradient_accumulation_steps 1 \
    --learning_rate 1e-04 \
    --attn_lr 0.0 \
@@ -184,7 +184,7 @@ deepspeed --num_gpus=1 src/run_qwen_new.py \
    --task_config_dir configs/CodeTask/KodCode \
    --output_dir logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/5-KodCode \
    --per_device_train_batch_size 8 \
-   --per_device_eval_batch_size 16 \
+   --per_device_eval_batch_size 32 \
    --gradient_accumulation_steps 2 \
    --learning_rate 1e-04 \
    --attn_lr 0.0 \
@@ -234,7 +234,7 @@ deepspeed --num_gpus=1 src/run_qwen_new.py \
    --task_config_dir configs/CodeTask/RunBugRun \
    --output_dir logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/6-RunBugRun \
    --per_device_train_batch_size 16 \
-   --per_device_eval_batch_size 16 \
+   --per_device_eval_batch_size 32 \
    --gradient_accumulation_steps 1 \
    --learning_rate 1e-04 \
    --attn_lr 0.0 \
@@ -284,7 +284,7 @@ deepspeed --num_gpus=1 src/run_qwen_new.py \
    --task_config_dir configs/CodeTask/TheVault_Csharp \
    --output_dir logs_and_outputs/test_qwen_codetask_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/7-TheVault_Csharp \
    --per_device_train_batch_size 16 \
-   --per_device_eval_batch_size 16 \
+   --per_device_eval_batch_size 32 \
    --gradient_accumulation_steps 1 \
    --learning_rate 1e-04 \
    --attn_lr 0.0 \
