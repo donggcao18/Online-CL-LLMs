@@ -257,18 +257,20 @@ class Trainer(Seq2SeqTrainer):
                 decay_parameters = get_parameter_names(opt_model, ALL_LAYERNORM_LAYERS)
                 decay_parameters = [name for name in decay_parameters if "bias" not in name]
                 optimizer_grouped_parameters = [
-                    {
-                        "params": [
-                            p for n, p in opt_model.named_parameters() if (n in decay_parameters and p.requires_grad)
-                        ],
-                        "weight_decay": self.args.weight_decay,
-                    },
-                    {
-                        "params": [
-                            p for n, p in opt_model.named_parameters() if (n not in decay_parameters and p.requires_grad)
-                        ],
-                        "weight_decay": 0.0,
-                    },
+                    g for g in [
+                        {
+                            "params": [
+                                p for n, p in opt_model.named_parameters() if (n in decay_parameters and p.requires_grad)
+                            ],
+                            "weight_decay": self.args.weight_decay,
+                        },
+                        {
+                            "params": [
+                                p for n, p in opt_model.named_parameters() if (n not in decay_parameters and p.requires_grad)
+                            ],
+                            "weight_decay": 0.0,
+                        },
+                    ] if len(g["params"]) > 0
                 ]
             else:
                 print("Using Different Learning Rates for Different Modules")
@@ -280,21 +282,23 @@ class Trainer(Seq2SeqTrainer):
                 resett_param_with_decay = [p for n, p in opt_model.named_parameters() if "trans_input" in n and n in decay_parameters and p.requires_grad]
                 other_param_with_decay = [p for n, p in opt_model.named_parameters() if "trans_input" not in n and n in decay_parameters and p.requires_grad]
                 optimizer_grouped_parameters = [
-                    {
-                        "params": other_param_with_decay,
-                        "weight_decay": self.args.weight_decay,
-                        "lr": self.args.learning_rate
-                    },
-                    {
-                        "params": resett_param_with_decay,
-                        "weight_decay": self.args.weight_decay,
-                        "lr": self.args.attn_lr
-                    },
-                    {
-                        "params": param_no_decay,
-                        "weight_decay": 0.0,
-                        "lr": self.args.learning_rate
-                    },
+                    g for g in [
+                        {
+                            "params": other_param_with_decay,
+                            "weight_decay": self.args.weight_decay,
+                            "lr": self.args.learning_rate
+                        },
+                        {
+                            "params": resett_param_with_decay,
+                            "weight_decay": self.args.weight_decay,
+                            "lr": self.args.attn_lr
+                        },
+                        {
+                            "params": param_no_decay,
+                            "weight_decay": 0.0,
+                            "lr": self.args.learning_rate
+                        },
+                    ] if len(g["params"]) > 0
                 ]
 
             optimizer_cls, optimizer_kwargs = Trainer.get_optimizer_cls_and_kwargs(self.args)
