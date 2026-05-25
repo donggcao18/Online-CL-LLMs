@@ -435,22 +435,24 @@ class Trainer(Seq2SeqTrainer):
                 if preds_host is None:
                     preds_host = logits
                 else:
-                    # Generated sequences vary in length across batches; pad dim=1 to match before concat
+                    # Generated sequences vary in length across batches. For 3D tensors
+                    # (BS, num_return_sequences, seq_len) shape[1] is always equal, so we
+                    # must check and pad the last dim (seq_len) for both 2D and 3D cases.
                     if (
                         isinstance(preds_host, torch.Tensor)
                         and isinstance(logits, torch.Tensor)
                         and preds_host.dim() >= 2
-                        and preds_host.shape[1] != logits.shape[1]
+                        and preds_host.shape[-1] != logits.shape[-1]
                     ):
-                        max_len = max(preds_host.shape[1], logits.shape[1])
-                        if preds_host.shape[1] < max_len:
+                        max_len = max(preds_host.shape[-1], logits.shape[-1])
+                        if preds_host.shape[-1] < max_len:
                             pad_shape = list(preds_host.shape)
-                            pad_shape[1] = max_len - preds_host.shape[1]
-                            preds_host = torch.cat([preds_host, preds_host.new_full(pad_shape, -100)], dim=1)
-                        if logits.shape[1] < max_len:
+                            pad_shape[-1] = max_len - preds_host.shape[-1]
+                            preds_host = torch.cat([preds_host, preds_host.new_full(pad_shape, -100)], dim=-1)
+                        if logits.shape[-1] < max_len:
                             pad_shape = list(logits.shape)
-                            pad_shape[1] = max_len - logits.shape[1]
-                            logits = torch.cat([logits, logits.new_full(pad_shape, -100)], dim=1)
+                            pad_shape[-1] = max_len - logits.shape[-1]
+                            logits = torch.cat([logits, logits.new_full(pad_shape, -100)], dim=-1)
                     preds_host = nested_concat(preds_host, logits, padding_index=-100)
             self.control = self.callback_handler.on_prediction_step(args, self.state, self.control)
 
