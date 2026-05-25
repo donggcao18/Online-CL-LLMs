@@ -15,12 +15,12 @@ fuser -k /dev/nvidia*
 
 export CUDA_DEVICE_ORDER="PCI_BUS_ID"
 export TORCH_DISTRIBUTED_DEBUG=DETAIL
-export CUDA_VISIBLE_DEVICES=0,1,2,3
+export CUDA_VISIBLE_DEVICES=0
 port=$(shuf -i25000-30000 -n1)
 DS_CONFIG="./configs/ds_configs/stage2.config"
 
 # Task 1: python
-deepspeed --num_gpus=4 src/run_qwen_new.py \
+deepspeed --num_gpus=1 src/run_qwen_new.py \
    --do_train \
    --do_eval \
    --do_predict \
@@ -30,12 +30,12 @@ deepspeed --num_gpus=4 src/run_qwen_new.py \
    --task_order python,cpp,swift,rust,csharp,java,php,typescript,shell \
    --task_config_dir configs/Executable/python \
    --output_dir logs_and_outputs/test_qwen_executable_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/1-python \
-   --per_device_train_batch_size 1 \
+   --per_device_train_batch_size 8 \
    --per_device_eval_batch_size 8 \
-   --gradient_accumulation_steps 8 \
+   --gradient_accumulation_steps 4 \
    --learning_rate 1e-04 \
    --attn_lr 0.0 \
-   --num_train_epochs 3 \
+   --num_train_epochs 1 \
    --run_name test_qwen_executable_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0 \
    --distances_temperature 1.0 \
    --distances_way L2 \
@@ -66,6 +66,8 @@ deepspeed --num_gpus=4 src/run_qwen_new.py \
    --successor N \
    --deepspeed $DS_CONFIG \
    --max_eval_samples 3 \
+   --max_train_samples 100 \
+   --max_predict_samples 32 \
    --bf16
    
 
@@ -73,7 +75,7 @@ deepspeed --num_gpus=4 src/run_qwen_new.py \
 rm -rf logs_and_outputs/test_qwen_executable_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/1-python/checkpoint*
 
 # Task 2: cpp
-deepspeed --num_gpus=4 src/run_qwen_new.py \
+deepspeed --num_gpus=1 src/run_qwen_new.py \
    --do_train \
    --do_eval \
    --do_predict \
@@ -129,7 +131,7 @@ rm -rf logs_and_outputs/test_qwen_executable_train_top_1_test_top_1_train_top_p_
 
 
 # Task 3: swift
-deepspeed --num_gpus=4 src/run_qwen_new.py \
+deepspeed --num_gpus=1 src/run_qwen_new.py \
    --do_train \
    --do_eval \
    --do_predict \
@@ -185,7 +187,7 @@ rm -rf logs_and_outputs/test_qwen_executable_train_top_1_test_top_1_train_top_p_
 
 
 # Task 4: rust
-deepspeed --num_gpus=4 src/run_qwen_new.py \
+deepspeed --num_gpus=1 src/run_qwen_new.py \
    --do_train \
    --do_predict \
    --do_eval \
@@ -242,7 +244,7 @@ rm -rf logs_and_outputs/test_qwen_executable_train_top_1_test_top_1_train_top_p_
 
 
 # Task 5: csharp
-deepspeed --num_gpus=4 src/run_qwen_new.py \
+deepspeed --num_gpus=1 src/run_qwen_new.py \
    --do_train \
    --do_eval \
    --do_predict \
@@ -297,7 +299,7 @@ deepspeed --num_gpus=4 src/run_qwen_new.py \
 rm -rf logs_and_outputs/test_qwen_executable_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/5-csharp/checkpoint*
 
 # Task 6: java
-deepspeed --num_gpus=4 src/run_qwen_new.py \
+deepspeed --num_gpus=1 src/run_qwen_new.py \
    --do_train \
    --do_eval \
    --predict_with_generate \
@@ -351,7 +353,7 @@ deepspeed --num_gpus=4 src/run_qwen_new.py \
 rm -rf logs_and_outputs/test_qwen_executable_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/6-java/checkpoint*
 
 # Task 7: php
-deepspeed --num_gpus=4 src/run_qwen_new.py \
+deepspeed --num_gpus=1 src/run_qwen_new.py \
    --do_train \
    --do_eval \
    --predict_with_generate \
@@ -405,7 +407,7 @@ deepspeed --num_gpus=4 src/run_qwen_new.py \
 rm -rf logs_and_outputs/test_qwen_executable_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/7-php/checkpoint*
 
 # Task 8: typescript
-deepspeed --num_gpus=4 src/run_qwen_new.py \
+deepspeed --num_gpus=1 src/run_qwen_new.py \
    --do_train \
    --do_predict \
    --do_eval \
@@ -460,7 +462,7 @@ deepspeed --num_gpus=4 src/run_qwen_new.py \
 rm -rf logs_and_outputs/test_qwen_executable_train_top_1_test_top_1_train_top_p_-1.0_test_top_p_-1.0/outputs/8-typescript/checkpoint*
 
 # Task 9: shell
-deepspeed --num_gpus=4 src/run_qwen_new.py \
+deepspeed --num_gpus=1 src/run_qwen_new.py \
    --do_train \
    --do_predict \
    --do_eval \
