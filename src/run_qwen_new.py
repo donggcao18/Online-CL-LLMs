@@ -881,6 +881,17 @@ def main():
         with open(os.path.join("logs_and_outputs", training_args.run_name, "outputs", "task_order.txt"), 'w') as f:
             f.write(data_args.task_order)
 
+    import gc
+
+    del trainer
+    del model
+    del train_dataset
+    del eval_dataset
+    del predict_dataset
+
+    gc.collect()
+    torch.cuda.empty_cache()
+    torch.cuda.reset_peak_memory_stats()
     return results
 
 
