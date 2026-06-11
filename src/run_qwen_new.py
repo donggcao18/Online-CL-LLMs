@@ -189,6 +189,12 @@ class ModelArguments:
         metadata={"help": "Path to load previous checkpoints"}
     )
 
+    lora_weights_dir: Optional[str] = field(
+        default=None,
+        metadata={"help": "Directory containing saved LoRA weights to load for eval/predict. "
+                          "Defaults to output_dir/saved_weights when not set."}
+    )
+
     previous_lora_distribution_path: str = field(
         default=None,
         metadata={"help": "Path to load previous distribution"}
@@ -572,10 +578,15 @@ def main():
     
     if not training_args.do_train:
         local_rank=torch.distributed.get_rank()
-        lora_A = torch.load(os.path.join(training_args.output_dir,'saved_weights', "lora_weights_A.pt"))
-        lora_B = torch.load(os.path.join(training_args.output_dir,'saved_weights', "lora_weights_B.pt"))
+        weights_dir = (
+            model_args.lora_weights_dir
+            if model_args.lora_weights_dir
+            else os.path.join(training_args.output_dir, 'saved_weights')
+        )
+        lora_A = torch.load(os.path.join(weights_dir, "lora_weights_A.pt"))
+        lora_B = torch.load(os.path.join(weights_dir, "lora_weights_B.pt"))
 
-        with open(os.path.join(training_args.output_dir,'saved_weights','lora_distribution.pkl'), 'rb') as file:
+        with open(os.path.join(weights_dir, 'lora_distribution.pkl'), 'rb') as file:
             distribution = pickle.load(file)
         
         for j in range(config.num_hidden_layers):
@@ -885,9 +896,12 @@ def main():
 
     del trainer
     del model
-    del train_dataset
-    del eval_dataset
-    del predict_dataset
+    if training_args.do_train:
+        del train_dataset
+    if training_args.do_eval:
+        del eval_dataset
+    if training_args.do_predict:
+        del predict_dataset
 
     gc.collect()
     torch.cuda.empty_cache()
