@@ -102,7 +102,7 @@ for k_idx in $(seq 0 8); do
             --test_key_weight_top_p -1.0
             --successor N
             --deepspeed "${DS_CONFIG}"
-            --bf16
+            --fp16
         )
 
         # Add previous LoRA paths only when they exist (task 1 has none)
