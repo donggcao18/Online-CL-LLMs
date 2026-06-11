@@ -447,6 +447,17 @@ def main():
     else:
         cur_task_id=14
 
+    # In eval/predict mode with --lora_weights_dir, cur_task_id must reflect
+    # the TRAINED model's task (e.g. shell=8), not the eval task (e.g. python=0).
+    # Distribution keys are saved as 'layers.{j}.task.{trained_task_id}.q' and
+    # previous-distribution lookups use (cur_task_id - i - 1), so using the eval
+    # task index here causes KeyErrors when evaluating on earlier tasks.
+    if not training_args.do_train and model_args.lora_weights_dir:
+        parent_dir = os.path.basename(os.path.dirname(model_args.lora_weights_dir.rstrip('/')))
+        parts = parent_dir.split('-', 1)
+        if len(parts) == 2 and parts[1] in task_order:
+            cur_task_id = task_order.index(parts[1])
+
     # Get the CL dataset
     raw_datasets = load_dataset(
         os.path.join(CURRENT_DIR, "cl_dataset.py"),
