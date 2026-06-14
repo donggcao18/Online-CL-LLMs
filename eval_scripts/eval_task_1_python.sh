@@ -55,7 +55,8 @@ run_eval() {
         --generation_max_length 2048
         --add_task_name False
         --add_dataset_name False
-        --overwrite_output_dir
+        --overwrite_output_dir \
+        --eval_accumulation_steps 1
         --overwrite_cache
         --lr_scheduler_type constant
         --warmup_steps 0

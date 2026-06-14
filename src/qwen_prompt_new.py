@@ -334,16 +334,21 @@ class Qwen2Attention(nn.Module):
         bsz, q_len, _ = hidden_states.size()
         out_dim = lora_layer.out_features
         _, num_task, _ = key_attention_weights.size()
+        # Compute weighted sum task-by-task instead of materializing the full
+        # (num_tasks, bsz, q_len, out_dim) tensor. During prefill q_len can be
+        # 1024, making the old concat_q shape (bsz, num_tasks, q_len*out_dim)
+        # hundreds of MB — this avoids that peak allocation.
+        cur_out = lora_layer(hidden_states)
+        dtype = cur_out.dtype
+        kw = key_attention_weights.to(dtype=dtype)  # (kw_bsz, num_task, 1)
         if pre_lora_layer is not None and num_task > 1:
-            cur_lora_states = lora_layer(hidden_states).unsqueeze(0)
+            agg = kw[:, 0:1, :] * cur_out
             with torch.no_grad():
-                pre_lora_states = torch.cat([pre_lora(hidden_states).unsqueeze(0) for pre_lora in pre_lora_layer], dim=0)
-            concat_q = torch.cat([cur_lora_states, pre_lora_states], dim=0).transpose(0, 1).reshape(bsz, -1, q_len * out_dim)
-            agg = torch.matmul(key_attention_weights.to(dtype=concat_q.dtype).transpose(1, 2), concat_q).squeeze()
+                for i, pre_lora in enumerate(pre_lora_layer):
+                    agg = agg + kw[:, i + 1:i + 2, :] * pre_lora(hidden_states).to(dtype)
         else:
-            cur_lora_states = lora_layer(hidden_states).unsqueeze(0).transpose(0, 1).reshape(bsz, -1, q_len * out_dim)
-            agg = torch.matmul(key_attention_weights.to(dtype=cur_lora_states.dtype).transpose(1, 2), cur_lora_states).squeeze()
-        return agg.reshape(bsz, -1, out_dim)
+            agg = kw * cur_out
+        return agg
 
     def calculate_distances(self, features, distributions, distance_type='L2', temperature=1.0):
         with torch.no_grad():

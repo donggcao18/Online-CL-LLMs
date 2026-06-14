@@ -663,6 +663,8 @@ class Trainer(Seq2SeqTrainer):
                     **generate_kwargs,
                 )
 
+        torch.cuda.empty_cache()
+
         bs, source_len = inputs['input_ids'].shape
         # in case the batch is shorter than max length, the output should be padded
         if is_decoder_model:
