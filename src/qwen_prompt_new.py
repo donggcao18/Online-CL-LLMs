@@ -339,10 +339,10 @@ class Qwen2Attention(nn.Module):
             with torch.no_grad():
                 pre_lora_states = torch.cat([pre_lora(hidden_states).unsqueeze(0) for pre_lora in pre_lora_layer], dim=0)
             concat_q = torch.cat([cur_lora_states, pre_lora_states], dim=0).transpose(0, 1).reshape(bsz, -1, q_len * out_dim)
-            agg = torch.matmul(key_attention_weights.transpose(1, 2), concat_q).squeeze()
+            agg = torch.matmul(key_attention_weights.to(dtype=concat_q.dtype).transpose(1, 2), concat_q).squeeze()
         else:
             cur_lora_states = lora_layer(hidden_states).unsqueeze(0).transpose(0, 1).reshape(bsz, -1, q_len * out_dim)
-            agg = torch.matmul(key_attention_weights.transpose(1, 2), cur_lora_states).squeeze()
+            agg = torch.matmul(key_attention_weights.to(dtype=cur_lora_states.dtype).transpose(1, 2), cur_lora_states).squeeze()
         return agg.reshape(bsz, -1, out_dim)
 
     def calculate_distances(self, features, distributions, distance_type='L2', temperature=1.0):
