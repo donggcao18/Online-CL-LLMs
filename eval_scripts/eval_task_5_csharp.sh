@@ -42,7 +42,7 @@ run_eval() {
         --task_config_dir "configs/Executable/${j_task}"
         --output_dir "${eval_output_dir}"
         --per_device_train_batch_size 1
-        --per_device_eval_batch_size 8
+        --per_device_eval_batch_size 1
         --gradient_accumulation_steps 1
         --learning_rate 1e-04
         --attn_lr 0.0
