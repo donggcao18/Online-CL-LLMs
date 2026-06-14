@@ -32,7 +32,7 @@ run_eval() {
     echo "================================================================"
     echo "Model trained through task ${k_num}-${k_task}, evaluating on: ${j_task}"
     echo "================================================================"
-    local cmd=(deepspeed --num_gpus=1 src/run_qwen_new.py
+    local cmd=(torchrun --nproc_per_node=1 src/run_qwen_new.py
         --do_predict
         --predict_with_generate
         --model_name_or_path Qwen/Qwen2.5-Coder-1.5B
@@ -75,8 +75,6 @@ run_eval() {
         --train_key_weight_top_p -1.0
         --test_key_weight_top_p -1.0
         --successor N
-        --deepspeed "${DS_CONFIG}"
-        --fp16
     )
     if [ -n "${PREV_LORA_PATH}" ]; then
         cmd+=(--previous_lora_path "${PREV_LORA_PATH}"
