@@ -1,32 +1,28 @@
 import os
 import json
 import hashlib 
-import numpy as np
+import argparse
+from functools import lru_cache
 from typing import Any, Dict
 from datasets import load_dataset, concatenate_datasets
 from task_info import TASK_SPECS, HF_SPLIT_MAP, INSTRUCTION_POOL, TRAIN_ONLY_TASKS, TASK_LIST, INSTRUCTION_SPLIT_POLICY
 FOLDER_NAME = os.path.dirname(os.path.abspath(__file__))
 
 
-def _split_train_only(dataset, task, split, split_seed=42):
-    sizes = TRAIN_ONLY_TASKS[task]
-    test_size = sizes['test']
-    val_size = sizes['val']
-
-    tmp = dataset.train_test_split(test_size=test_size, seed=split_seed)
-    test_ds = tmp['test']
-
-    tmp2 = tmp['train'].train_test_split(test_size=val_size, seed=split_seed)
-    train_ds = tmp2['train']
-    val_ds = tmp2['test']
-
-    mapping = {'train': train_ds, 'validation': val_ds, 'test': test_ds}
-    if split not in mapping:
+def _split_train_only(dataset, task, split=None, split_seed=42):
+    """Reserve held-out data before trimming; return all splits or one split."""
+    if split is not None and split not in ('train', 'validation', 'test'):
         raise ValueError(f"Unknown split '{split}' for train-only task '{task}'")
-    return mapping[split]
+    sizes = TRAIN_ONLY_TASKS[task]
+    held_out = dataset.train_test_split(test_size=sizes['test'], seed=split_seed)
+    remaining = held_out['train'].train_test_split(test_size=sizes['val'], seed=split_seed)
+    splits = {'train': remaining['train'], 'validation': remaining['test'], 'test': held_out['test']}
+    return splits if split is None else splits[split]
 
 
-def _load_task_split(task, split_name, split_seed=42):
+@lru_cache(maxsize=1)
+def _load_task_data(task, split_seed=42):
+    """Load a task once, retaining its splits for conversion before moving on."""
     spec = TASK_SPECS[task]
 
     if task == 'TheVault_Csharp':
@@ -35,23 +31,27 @@ def _load_task_split(task, split_name, split_seed=42):
             'validation': ['validation'],
             'test': ['test'],
         }
-        dataset_dict = load_dataset(
-            spec['dataset_name'],
-            languages=['c#'],
-            split_set=split_map[split_name],
-        )
-        return concatenate_datasets(list(dataset_dict.values()))
+        return {
+            split: concatenate_datasets(list(load_dataset(
+                spec['dataset_name'], languages=['c#'], split_set=source_splits,
+            ).values()))
+            for split, source_splits in split_map.items()
+        }
 
     if task == 'KodCode':
         dataset = load_dataset(spec['dataset_name'], split='train')
-        return _split_train_only(dataset, task, split_name, split_seed=split_seed)
-
-    if task == 'RunBugRun':
+    elif task == 'RunBugRun':
         dataset = load_dataset(spec['dataset_name'], split='train')
         dataset = dataset.filter(lambda example: example['language'] == 'ruby')
-        return _split_train_only(dataset, task, split_name, split_seed=split_seed)
+    else:
+        return load_dataset(spec['dataset_name'])
 
-    return load_dataset(spec['dataset_name'], split=HF_SPLIT_MAP[split_name])
+    # Split the filtered source once; the held-out rows are never sampled for training.
+    return _split_train_only(dataset, task, split_seed=split_seed)
+
+
+def _load_task_split(task, split_name, split_seed=42):
+    return _load_task_data(task, split_seed)[HF_SPLIT_MAP[split_name]]
 
 
 def _to_string(value):
@@ -120,40 +120,50 @@ def convert_to_codetask(
     split_seed=42,
     max_dev_samples=1000,
     max_test_samples=1000,
-    max_train_samples=None,
+    max_train_samples=30000,
     use_instruction_pool=True,
+    output_dir=None,
+    tasks=None,
 ):
     if split_name not in HF_SPLIT_MAP:
         raise ValueError(f"Unsupported split_name '{split_name}'. Use one of {list(HF_SPLIT_MAP.keys())}")
 
-    for task in TASK_LIST:
+    for task in TASK_LIST if tasks is None else tasks:
         try:
-            save_dir = os.path.join(FOLDER_NAME, task)
+            save_dir = os.path.join(output_dir or os.path.join(FOLDER_NAME, 'trimmed_30k'), task)
             os.makedirs(save_dir, exist_ok=True)
             dataset = _load_task_split(task, split_name, split_seed=split_seed)
+            source_size = len(dataset)
             if split_name == 'train' and max_train_samples is not None:
                 original_size = len(dataset)
                 if original_size > max_train_samples:
-                    dataset = dataset.select(range(max_train_samples))
-                    print(f"[{task}::{split_name}] Truncated train set: {original_size} → {max_train_samples} samples")
+                    dataset = dataset.shuffle(seed=split_seed).select(range(max_train_samples))
+                    print(f"[{task}::{split_name}] Randomly sampled train set: {original_size} -> {max_train_samples} samples (seed={split_seed})")
                 else:
                     print(f"[{task}::{split_name}] Train set size: {original_size} (max_train_samples={max_train_samples}, no truncation needed)")
             elif split_name in ('dev', 'validation') and max_dev_samples is not None:
                 original_size = len(dataset)
                 if original_size > max_dev_samples:
                     dataset = dataset.select(range(max_dev_samples))
-                    print(f"[{task}::{split_name}] Truncated dev set: {original_size} → {max_dev_samples} samples")
+                    print(f"[{task}::{split_name}] Truncated dev set: {original_size} -> {max_dev_samples} samples")
                 else:
                     print(f"[{task}::{split_name}] Dev set size: {original_size} (max_dev_samples={max_dev_samples}, no truncation needed)")
             elif split_name == 'test' and max_test_samples is not None:
                 original_size = len(dataset)
                 if original_size > max_test_samples:
                     dataset = dataset.select(range(max_test_samples))
-                    print(f"[{task}::{split_name}] Truncated test set: {original_size} → {max_test_samples} samples")
+                    print(f"[{task}::{split_name}] Truncated test set: {original_size} -> {max_test_samples} samples")
                 else:
                     print(f"[{task}::{split_name}] Test set size: {original_size} (max_test_samples={max_test_samples}, no truncation needed)")
 
             output_data = {
+                'Preprocessing': {
+                    'source': TASK_SPECS[task]['dataset_name'],
+                    'source_split_size': source_size,
+                    'selected_size': len(dataset),
+                    'seed': split_seed,
+                    'training_cap': max_train_samples,
+                },
                 "Definition": [TASK_SPECS[task]['definition']],
                 "Positive Examples": [],
                 "Negative Examples": [],
@@ -193,17 +203,37 @@ def convert_to_codetask(
                 json.dump(output_data, f, ensure_ascii=False, indent=2)
 
         except Exception as e:
-            print(f"⚠️  Skipped {task}::{split_name}: {e}")
+            raise RuntimeError(f"Failed to prepare {task}::{split_name}") from e
 
 
-if __name__ == "__main__":
-    np.random.seed(42)
-    for split in ["train", "validation", "test"]:
-        convert_to_codetask(
-            split_name=split,
-            split_seed=42,
-            max_dev_samples=1000,
-            max_test_samples=5000,
-            max_train_samples=100000,
-            use_instruction_pool=True,
-        )
+def main():
+    parser = argparse.ArgumentParser(description="Prepare the eight CodeTask datasets once for reuse/upload.")
+    parser.add_argument('--output-dir', default=os.path.join(FOLDER_NAME, 'trimmed_30k'))
+    parser.add_argument('--max-train-samples', type=int, default=30000)
+    parser.add_argument('--seed', type=int, default=42)
+    # Preserve the previous preprocessing evaluation policy and membership.
+    parser.add_argument('--max-dev-samples', type=int, default=1000, help='0 keeps the full validation split')
+    parser.add_argument('--max-test-samples', type=int, default=5000, help='0 keeps the full test split')
+    parser.add_argument('--tasks', nargs='+', choices=TASK_LIST, default=TASK_LIST)
+    args = parser.parse_args()
+    if args.max_train_samples <= 0 or min(args.max_dev_samples, args.max_test_samples) < 0:
+        parser.error('Training cap must be positive; evaluation caps must be nonnegative.')
+
+    for task in args.tasks:
+        try:
+            for split in ['train', 'validation', 'test']:
+                convert_to_codetask(
+                    split_name=split, split_seed=args.seed,
+                    max_dev_samples=args.max_dev_samples or None,
+                    max_test_samples=args.max_test_samples or None,
+                    max_train_samples=args.max_train_samples,
+                    output_dir=args.output_dir, tasks=[task],
+                )
+        finally:
+            _load_task_data.cache_clear()
+
+    print(f"Prepared datasets saved to {os.path.abspath(args.output_dir)}")
+
+
+if __name__ == '__main__':
+    main()

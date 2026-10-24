@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Dict, List, Any
 
 from datasets import Dataset, DatasetDict
+from task_info import TASK_LIST
 
 
 SPLIT_MAP = {
@@ -49,6 +50,8 @@ def build_task_dataset(task_dir: Path) -> DatasetDict:
         split_file = task_dir / f"{raw_split}.json"
         if split_file.exists():
             ds_dict[hf_split] = load_codetask_split(split_file, task_name, hf_split)
+        else:
+            raise FileNotFoundError(f"Missing required split: {split_file}")
 
     if not ds_dict:
         raise ValueError(f"No split files found in {task_dir}")
@@ -63,7 +66,7 @@ def main() -> None:
     parser.add_argument(
         "--data_root",
         type=str,
-        default="/data/scratch/projects/punim1928/HUST/east/CodeGR/Dense/Online-CL-LLMs/CODETASK_Benchmark",
+        default=str(Path(__file__).resolve().parent / 'trimmed_30k'),
         help="Path containing task folders (BFP, CodeSearchNet, ...)",
     )
     parser.add_argument(
@@ -87,6 +90,7 @@ def main() -> None:
         "--task",
         type=str,
         default=None,
+        choices=TASK_LIST,
         help="Upload only one task folder name, e.g. BFP",
     )
     parser.add_argument(
@@ -100,12 +104,13 @@ def main() -> None:
     if not data_root.exists():
         raise FileNotFoundError(f"Data root not found: {data_root}")
 
-    task_dirs = sorted([p for p in data_root.iterdir() if p.is_dir()])
-    if args.task:
-        task_dirs = [p for p in task_dirs if p.name == args.task]
-
-    if not task_dirs:
-        raise ValueError("No task folders matched your selection")
+    task_dirs = [data_root / task for task in ([args.task] if args.task else TASK_LIST)]
+    # Check every requested split before starting any remote uploads.
+    for task_dir in task_dirs:
+        for split in SPLIT_MAP:
+            split_file = task_dir / f'{split}.json'
+            if not split_file.is_file():
+                raise FileNotFoundError(f'Missing prepared split: {split_file}. Run parse_into_json.py first.')
 
     merged_rows: Dict[str, List[Dict[str, Any]]] = {"train": [], "validation": [], "test": []}
 
